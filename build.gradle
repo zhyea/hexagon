@@ -2,8 +2,8 @@ allprojects {
     apply plugin: 'scala'
     apply plugin: 'idea'
 
-    group: 'com.zhyea.hexagon'
-    version: '0.1-SNAPSHOT'
+    group = 'com.zhyea.hexagon'
+    version = '0.1-SNAPSHOT'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
