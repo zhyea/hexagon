@@ -35,6 +35,10 @@ subprojects {
 
 project(':core') {
 
+    dependencies {
+        compile group: 'com.101tec', name: 'zkclient', version: '0.10'
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    }
 }
 
 project(':sample') {
