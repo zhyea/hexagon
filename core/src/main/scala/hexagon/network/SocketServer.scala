@@ -58,9 +58,26 @@ private[network] class Processor(val handlerMapping: HandlerMapping,
   override def run(): Unit = {
     configureNewConnections()
     while (isRunning) {
+      val ready = selector.select(500)
+      if (ready > 0) {
+        val keys = selector.keys()
+        val iter = keys.iterator()
+        while (iter.hasNext && isRunning) {
+          var key: SelectionKey = null
+          try {
+            key = iter.next()
+            iter.remove()
+
+          } catch {
+            case e: Throwable => error("Error in accepter", e)
+          }
+        }
+      }
 
     }
   }
+
+  private def accept() {}
 
 
   private def configureNewConnections() {
