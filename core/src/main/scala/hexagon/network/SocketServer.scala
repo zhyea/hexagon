@@ -1,7 +1,8 @@
 package hexagon.network
 
-import java.nio.channels.Selector
-import java.util.concurrent.CountDownLatch
+import java.nio.channels.{SelectableChannel, SelectionKey, Selector, SocketChannel}
+import java.sql.Time
+import java.util.concurrent.{ConcurrentLinkedQueue, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.network.Handler.HandlerMapping
@@ -21,7 +22,7 @@ class SocketServer(val port: Int,
 
 private[network] abstract class AbstractServerThread extends Runnable with Logging {
 
-  private val selector: Selector = Selector.open()
+  protected val selector: Selector = Selector.open()
   private val startupLatch = new CountDownLatch(1)
   private val shutdownLatch = new CountDownLatch(1)
   private val alive = new AtomicBoolean(false)
@@ -48,7 +49,25 @@ private[network] abstract class AbstractServerThread extends Runnable with Loggi
 }
 
 
-private[network] class Processor {
+private[network] class Processor(val handlerMapping: HandlerMapping,
+                                 val time: Time,
+                                 val maxRequestSize: Int) extends AbstractServerThread {
+
+  private val newConnections = new ConcurrentLinkedQueue[SocketChannel]()
+
+  override def run(): Unit = {
+    configureNewConnections()
+    while (isRunning) {
+
+    }
+  }
 
 
+  private def configureNewConnections() {
+    while (newConnections.size > 0) {
+      val channel = newConnections.poll()
+      debug("Listening to new connection from " + channel.socket.getRemoteSocketAddress)
+      channel.register(selector, SelectionKey.OP_READ)
+    }
+  }
 }
