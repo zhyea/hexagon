@@ -7,11 +7,19 @@ import hexagon.utils.PropKit
 class ZKConfig(props: Properties) {
 
 
-  val zkHost = PropKit.getString(props, "zk.host", null)
+  /**
+    * zk host地址
+    */
+  val zkHost: String = PropKit.getString(props, "zk.host", null)
 
+  /**
+    * zookeeper session 过期时间
+    */
   val zkSessionTimeoutMs = PropKit.getInt(props, "zk.session.timeout.ms", 6000)
 
-  /** the max time that the client waits to establish a connection to zookeeper */
+  /**
+    * 和zookeeper建立连接时的最长等待时间
+    */
   val zkConnectionTimeoutMs = PropKit.getInt(props, "zk.connection.timeout.ms", zkSessionTimeoutMs)
 
   /** how far a ZK follower can be behind a ZK leader */
