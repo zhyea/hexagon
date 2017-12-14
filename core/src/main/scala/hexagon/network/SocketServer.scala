@@ -25,7 +25,7 @@ class SocketServer(val port: Int,
 			processors(i) = new Processor(handlerFactory, maxRequestSize)
 			Utils.newThread("hexagon-processor-" + i, processors(i)).start()
 		}
-		Utils.newThread("hexagon", acceptor).start()
+		Utils.newThread("hexagon-acceptor", acceptor).start()
 		acceptor.awaitStartup()
 	}
 
@@ -91,7 +91,7 @@ private[network] class Acceptor(val port: Int,
 						if (key.isAcceptable)
 							accept(key, processors(currentProcessor))
 						else
-							throw new IllegalArgumentException("\"Unrecognized key state for acceptor thread.\"")
+							throw new IllegalArgumentException("Unrecognized key state for acceptor thread.")
 
 						currentProcessor = (currentProcessor + 1) % processors.length
 					} catch {
@@ -257,7 +257,6 @@ private class Processor(val handlerMapping: HandlerMapping,
 	private def inetAddress(key: SelectionKey): String = channelFor(key).socket().getInetAddress.toString
 
 	private def remoteAddress(key: SelectionKey): String = channelFor(key).socket().getRemoteSocketAddress.toString
-
 
 	private def channelFor(key: SelectionKey): SocketChannel = key.channel().asInstanceOf[SocketChannel]
 
