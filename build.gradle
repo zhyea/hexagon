@@ -41,6 +41,12 @@ project(':core') {
     }
 }
 
-project(':sample') {
+project(':api') {
 
+}
+
+project(':sample') {
+    dependencies {
+        compile project(":core")
+    }
 }
