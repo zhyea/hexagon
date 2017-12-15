@@ -1,6 +1,6 @@
 package hexagon.utils
 
-object Utils {
+object ThreadUtils {
 
 
 	def newThread(name: String, runnable: Runnable): Thread = {

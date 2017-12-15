@@ -8,7 +8,7 @@ import java.util.concurrent.{ConcurrentLinkedQueue, CountDownLatch}
 
 import hexagon.exception.InvalidRequestException
 import hexagon.network.Handler.HandlerMapping
-import hexagon.utils.{Logging, RequestKeys, Utils}
+import hexagon.utils.{Logging, RequestKeys, ThreadUtils}
 
 class SocketServer(val port: Int,
 						 val numProcessorThreads: Int,
@@ -23,9 +23,9 @@ class SocketServer(val port: Int,
 	def startup(): Unit = {
 		for (i <- 0 until numProcessorThreads) {
 			processors(i) = new Processor(handlerFactory, maxRequestSize)
-			Utils.newThread("hexagon-processor-" + i, processors(i)).start()
+			ThreadUtils.newThread("hexagon-processor-" + i, processors(i)).start()
 		}
-		Utils.newThread("hexagon-acceptor", acceptor).start()
+		ThreadUtils.newThread("hexagon-acceptor", acceptor).start()
 		acceptor.awaitStartup()
 	}
 
