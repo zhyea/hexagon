@@ -1,8 +1,7 @@
 package hexagon.server
 
 import hexagon.config.HexagonConfig
-import hexagon.utils.Logging
-import hexagon.utils.ZKUtils.ZkStringSerializer
+import hexagon.utils.{Logging, ZkStringSerializer}
 import org.I0Itec.zkclient.{IZkStateListener, ZkClient}
 import org.apache.zookeeper.Watcher.Event
 
