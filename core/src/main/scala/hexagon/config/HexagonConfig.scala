@@ -7,10 +7,12 @@ import hexagon.utils.PropKit
 class HexagonConfig(props: Properties) extends ZKConfig(props) {
 
 
-	val brokerIdsPath: String = "/brokers/ids"
+  val port: Int = PropKit.getInt(props, "broker.port", 6667)
 
-	val brokerId: Int = PropKit.getInt(props, "broker.id")
+  val brokerIdsPath: String = "/brokers/ids"
 
-	val hostName: String = PropKit.getString(props, "hostname")
+  val brokerId: Int = PropKit.getInt(props, "broker.id")
+
+  val hostName: String = PropKit.getString(props, "hostname")
 
 }
