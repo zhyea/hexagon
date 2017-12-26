@@ -15,6 +15,8 @@ class HexagonZooKeeper(val config: HexagonConfig) extends Logging {
 
   var zkClient: ZkClient = null
 
+  var topics: List[String] = Nil
+
   val lock = new Object()
 
   def startup() {
@@ -42,8 +44,15 @@ class HexagonZooKeeper(val config: HexagonConfig) extends Logging {
   }
 
 
+  def registerTopic(topic: String): Unit = {
+    registerTopicInZkInternal(topic)
+    lock.synchronized {
+      topics ::= topic
+    }
+  }
+
   /**
-    * 注册topic
+    * Register topic
     */
   def registerTopicInZkInternal(topic: String): Unit = {
     val brokerTopicPath = config.brokerTopicsPath + "/" + topic + "/" + config.brokerId
