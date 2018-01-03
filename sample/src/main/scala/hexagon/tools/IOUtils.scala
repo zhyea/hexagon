@@ -11,12 +11,12 @@ object IOUtils {
 	def read(input: InputStream): String = {
 		var reader: BufferedReader = null
 		try {
-			reader = new BufferedReader(new InputStreamReader(input))
 			val builder = new StringBuilder
-			var line = reader.readLine()
-			while (null != line) {
-				builder.append(line).append(NEW_LINE)
-				line = reader.readLine()
+			var buffer = new Array[Byte](1024)
+			var len = input.read(buffer)
+			while (len > 0) {
+				builder.append(new String(buffer, 0, len))
+				len = input.read(buffer)
 			}
 			builder.toString
 		} finally {

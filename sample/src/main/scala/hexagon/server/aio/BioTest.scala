@@ -9,10 +9,12 @@ object BioTest extends App {
 	val bioServer = new BioServer(port)
 
 	new Thread(() => bioServer.start()).start()
+	println("Server started.")
 
-/*	val bioClient = new BioClient(host, port)
+	val bioClient = new BioClient(host, port)
 
-	new Thread(() => bioClient.send("The request from client.")).start()*/
+	new Thread(() => bioClient.send("The request from client.")).start()
+	println("Client started.");
 
 	TimeUnit.SECONDS.sleep(10)
 
