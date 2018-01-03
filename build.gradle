@@ -53,7 +53,7 @@ project(':api') {
 
 
 project(':sample') {
-    dependencies {
+/*    dependencies {
         compile project(":core")
-    }
+    }*/
 }
