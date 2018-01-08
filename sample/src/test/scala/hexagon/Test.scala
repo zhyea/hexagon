@@ -8,7 +8,7 @@ object Test extends App {
 
   props.put("zz", null)
 
-  println(props.get("zz").toString)
+  println(props.getProperty("zz"))
 
 
 }

@@ -7,8 +7,8 @@ object PropKit {
 
 
   def getString(props: Properties, key: String, defaultValue: String): String = {
-    if (props.containsKey(key) && null != props.get(key))
-      props.get(key).asInstanceOf[String]
+    if (props.containsKey(key))
+      props.getProperty(key)
     else
       defaultValue
   }
@@ -18,8 +18,8 @@ object PropKit {
 
 
   def getInt(props: Properties, key: String, defaultValue: Int): Int = {
-    if (props.containsKey(key) && null != props.get(key))
-      props.get(key).toString.toInt
+    if (props.containsKey(key))
+      props.getProperty(key).toInt
     else
       defaultValue
   }
