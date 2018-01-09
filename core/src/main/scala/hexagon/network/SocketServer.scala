@@ -3,7 +3,8 @@ package hexagon.network
 import java.net.InetSocketAddress
 import java.nio.channels.ServerSocketChannel
 
-class SocketServer(private val port: Int) {
+class SocketServer(private val port: Int,
+                                    private val threadNum: Int) {
 
   private val serverSocketChannel: ServerSocketChannel = ServerSocketChannel.open()
 
