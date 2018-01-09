@@ -9,10 +9,9 @@ object IOUtils {
 
 
 	def read(input: InputStream): String = {
-		var reader: BufferedReader = null
 		try {
 			val builder = new StringBuilder
-			var buffer = new Array[Byte](1024)
+			val buffer = new Array[Byte](1024)
 			var len = input.read(buffer)
 			while (len > 0) {
 				builder.append(new String(buffer, 0, len))
@@ -21,7 +20,6 @@ object IOUtils {
 			builder.toString
 		} finally {
 			if (null != input) input.close()
-			if (null != reader) reader.close()
 		}
 	}
 
