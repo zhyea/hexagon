@@ -1,6 +1,7 @@
 package hexagon.server.nio
 
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel, SocketChannel}
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -61,7 +62,7 @@ class NioServer(private val port: Int) {
         accept(key)
       }
       if (key.isReadable) {
-
+        read(key)
       }
     }
   }
@@ -77,5 +78,16 @@ class NioServer(private val port: Int) {
 
   def read(key: SelectionKey): Unit = {
     val sc = key.channel().asInstanceOf[SocketChannel]
+    val buffer = ByteBuffer.allocate(1024)
+    val read = sc.read(buffer)
+    if (read > 0) {
+      buffer.flip()
+      val bytes = new Array[Byte](buffer.remaining())
+      buffer.get(bytes)
+
+    } else if (read < 0) {
+      key.cancel()
+      sc.close()
+    }
   }
 }
