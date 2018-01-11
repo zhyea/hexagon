@@ -8,86 +8,97 @@ import java.util.concurrent.atomic.AtomicBoolean
 class NioServer(private val port: Int) {
 
 
-  private val isRunning: AtomicBoolean = new AtomicBoolean(false)
+	private val isRunning: AtomicBoolean = new AtomicBoolean(false)
 
-  private var selector: Selector = null
-  private var serverChannel: ServerSocketChannel = null
+	private var selector: Selector = null
+	private var serverChannel: ServerSocketChannel = null
 
-  def init(): Unit = {
-    try {
-      selector = Selector.open
-      serverChannel = ServerSocketChannel.open
+	def init(): Unit = {
+		try {
+			selector = Selector.open
+			serverChannel = ServerSocketChannel.open
 
-      serverChannel.configureBlocking(true)
-      serverChannel.socket().bind(new InetSocketAddress(port), 1024)
+			serverChannel.configureBlocking(true)
+			serverChannel.socket().bind(new InetSocketAddress(port), 1024)
 
-      serverChannel.register(selector, SelectionKey.OP_ACCEPT)
+			serverChannel.register(selector, SelectionKey.OP_ACCEPT)
 
-      isRunning.set(true)
+			isRunning.set(true)
 
-      println("Server started. Port is : " + port)
-    } catch {
-      case e: Exception => e.printStackTrace()
-    }
-  }
-
-
-  def start(): Unit = {
-    init()
-
-    while (isRunning.get()) {
-      selector.select(1000)
-      val keys = selector.selectedKeys()
-      val iter = keys.iterator()
-
-      var key: SelectionKey = null
-      while (iter.hasNext) {
-        key = iter.next()
-        iter.remove()
-      }
-    }
-
-    if (null != selector)
-      selector.close()
-  }
+			println("Server started. Port is : " + port)
+		} catch {
+			case e: Exception => e.printStackTrace()
+		}
+	}
 
 
-  def stop(): Unit = {
-    isRunning.set(false)
-  }
+	def start(): Unit = {
+		init()
 
-  def handle(key: SelectionKey): Unit = {
-    if (key.isValid) {
-      if (key.isAcceptable) {
-        accept(key)
-      }
-      if (key.isReadable) {
-        read(key)
-      }
-    }
-  }
+		while (isRunning.get()) {
+			selector.select(1000)
+			val keys = selector.selectedKeys()
+			val iter = keys.iterator()
 
+			var key: SelectionKey = null
+			while (iter.hasNext) {
+				key = iter.next()
+				iter.remove()
+			}
+		}
 
-  def accept(key: SelectionKey): Unit = {
-    val ssc = key.channel().asInstanceOf[ServerSocketChannel]
-    val sc = ssc.accept()
-    sc.configureBlocking(true)
-    sc.register(selector, SelectionKey.OP_READ)
-  }
+		if (null != selector)
+			selector.close()
+	}
 
 
-  def read(key: SelectionKey): Unit = {
-    val sc = key.channel().asInstanceOf[SocketChannel]
-    val buffer = ByteBuffer.allocate(1024)
-    val read = sc.read(buffer)
-    if (read > 0) {
-      buffer.flip()
-      val bytes = new Array[Byte](buffer.remaining())
-      buffer.get(bytes)
+	def stop(): Unit = {
+		isRunning.set(false)
+	}
 
-    } else if (read < 0) {
-      key.cancel()
-      sc.close()
-    }
-  }
+	def handle(key: SelectionKey): Unit = {
+		if (key.isValid) {
+			if (key.isAcceptable) {
+				accept(key)
+			}
+			if (key.isReadable) {
+				read(key)
+			}
+		}
+	}
+
+
+	private def accept(key: SelectionKey): Unit = {
+		val ssc = key.channel().asInstanceOf[ServerSocketChannel]
+		val sc = ssc.accept()
+		sc.configureBlocking(true)
+		sc.register(selector, SelectionKey.OP_READ)
+	}
+
+
+	private def read(key: SelectionKey): Unit = {
+		val sc = key.channel().asInstanceOf[SocketChannel]
+		val buffer = ByteBuffer.allocate(1024)
+		val read = sc.read(buffer)
+		if (read > 0) {
+			buffer.flip()
+			val bytes = new Array[Byte](buffer.remaining())
+			buffer.get(bytes)
+			println(new String(bytes))
+
+			write(sc)
+		} else if (read < 0) {
+			key.cancel()
+			sc.close()
+		}
+	}
+
+
+	private def write(sc: SocketChannel): Unit = {
+		val bytes: Array[Byte] = "response from server.".getBytes()
+		val buffer = ByteBuffer.allocate(bytes.length)
+		buffer.put(bytes)
+		buffer.flip()
+		sc.write(buffer)
+	}
 }
