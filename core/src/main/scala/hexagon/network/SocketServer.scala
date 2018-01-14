@@ -1,26 +1,38 @@
 package hexagon.network
 
 import java.net.InetSocketAddress
-import java.nio.channels.ServerSocketChannel
+import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel}
 
 class SocketServer(private val port: Int,
-                                    private val threadNum: Int) {
+                   private val numProcessorThreads: Int) {
 
-  private val serverSocketChannel: ServerSocketChannel = ServerSocketChannel.open()
+
+  private var selector: Selector = null
+  private var serverSocketChannel: ServerSocketChannel = null
 
   def start(): Unit = {
+    selector = Selector.open()
+    serverSocketChannel = ServerSocketChannel.open()
+    serverSocketChannel.configureBlocking(false)
     serverSocketChannel.socket().bind(new InetSocketAddress(port))
-    while (true) {
-      val socketChannel = serverSocketChannel.accept()
-      if (null != socketChannel) {
-        // do something
-      }
-    }
+    serverSocketChannel.register(selector, SelectionKey.OP_READ)
+
   }
 
 
   def shutdown(): Unit = {
-    serverSocketChannel.close()
+    if (null != serverSocketChannel) serverSocketChannel.close()
+    if (null != selector) selector.close()
   }
 
 }
+
+
+private class Processor extends Runnable {
+
+  override def run(): Unit = ???
+
+}
+
+
+
