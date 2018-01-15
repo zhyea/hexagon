@@ -2,7 +2,7 @@ package hexagon.tools
 
 import org.slf4j.{Logger, LoggerFactory}
 
-class Logging {
+trait Logging {
 
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
