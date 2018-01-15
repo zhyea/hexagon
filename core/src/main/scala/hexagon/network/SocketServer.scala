@@ -35,4 +35,14 @@ private class Processor extends Runnable {
 }
 
 
+private class Acceptor(val host: String,
+                       val port: Int,
+                       val sendBufferSize: Int,
+                       val receiveBufferSize: Int) extends Runnable {
+
+  val serverSocketChannel = ServerSocketChannel.open()
+
+  override def run(): Unit = ???
+}
+
 
