@@ -2,6 +2,8 @@ package hexagon.network
 
 import java.net.InetSocketAddress
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel}
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.exceptions.HexagonConnectException
 import hexagon.tools.{Logging, StringUtils}
@@ -32,6 +34,19 @@ class SocketServer(private val port: Int,
 }
 
 
+private abstract class AbstractServerThread() extends Runnable with Logging {
+
+  protected val selector = Selector.open()
+  private val startupLatch = new CountDownLatch(1)
+  private val shutdownLatch = new CountDownLatch(1)
+  private val isRunning = new AtomicBoolean(false)
+
+
+
+
+}
+
+
 private class Processor extends Runnable {
 
   override def run(): Unit = ???
@@ -46,7 +61,9 @@ private class Acceptor(val host: String,
   val selector = Selector.open()
   val serverSocketChannel = openSocket()
 
-  override def run(): Unit = ???
+  override def run(): Unit = {
+    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT)
+  }
 
 
   def openSocket(): ServerSocketChannel = {
