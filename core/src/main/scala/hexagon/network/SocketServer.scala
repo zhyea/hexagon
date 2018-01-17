@@ -42,23 +42,33 @@ private abstract class AbstractServerThread() extends Runnable with Logging {
   private val isRunning = new AtomicBoolean(false)
 
 
+  def awaitStartup(): Unit = startupLatch.await()
 
 
+  def startupComplete(): Unit = {
+    isRunning.set(true)
+    startupLatch.countDown()
+  }
+
+
+  def shutdown(): Unit = {
+    selector.wakeup()
+    shutdownLatch.await()
+    isRunning.set(false)
+  }
+
+  def shutdownComplete() = shutdownLatch.countDown()
+
+
+  def wakeup() = selector.wakeup()
 }
 
 
-private class Processor extends Runnable {
+private class ServerThread(val host: String,
+                           val port: Int,
+                           val sendBufferSize: Int,
+                           val receiveBufferSize: Int) extends AbstractServerThread with Logging {
 
-  override def run(): Unit = ???
-
-}
-
-
-private class Acceptor(val host: String,
-                       val port: Int,
-                       val sendBufferSize: Int,
-                       val receiveBufferSize: Int) extends Runnable with Logging {
-  val selector = Selector.open()
   val serverSocketChannel = openSocket()
 
   override def run(): Unit = {
@@ -82,6 +92,13 @@ private class Acceptor(val host: String,
     }
     serverSocketChannel
   }
+}
+
+
+private class Processor extends Runnable {
+
+  override def run(): Unit = ???
+
 }
 
 
