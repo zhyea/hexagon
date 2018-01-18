@@ -39,14 +39,14 @@ private abstract class AbstractServerThread() extends Runnable with Logging {
   protected val selector = Selector.open()
   private val startupLatch = new CountDownLatch(1)
   private val shutdownLatch = new CountDownLatch(1)
-  private val isRunning = new AtomicBoolean(false)
+  private val alive = new AtomicBoolean(false)
 
 
   def awaitStartup(): Unit = startupLatch.await()
 
 
   def startupComplete(): Unit = {
-    isRunning.set(true)
+    alive.set(true)
     startupLatch.countDown()
   }
 
@@ -54,13 +54,16 @@ private abstract class AbstractServerThread() extends Runnable with Logging {
   def shutdown(): Unit = {
     selector.wakeup()
     shutdownLatch.await()
-    isRunning.set(false)
+    alive.set(false)
   }
 
   def shutdownComplete() = shutdownLatch.countDown()
 
 
   def wakeup() = selector.wakeup()
+
+
+  def isRunning(): Boolean = alive.get()
 }
 
 
@@ -73,6 +76,7 @@ private class ServerThread(val host: String,
 
   override def run(): Unit = {
     serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT)
+    startupComplete()
   }
 
 
