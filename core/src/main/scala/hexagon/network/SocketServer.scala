@@ -77,10 +77,38 @@ private class ServerThread(val host: String,
   override def run(): Unit = {
     serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT)
     startupComplete()
+
+    while (isRunning) {
+      val readyKeyNum = selector.select(1000)
+      if (readyKeyNum > 0) {
+        val readyKeys = selector.selectedKeys()
+        val iter = readyKeys.iterator()
+
+        var key: SelectionKey = null
+        while (iter.hasNext) {
+          key = iter.next()
+          iter.remove()
+
+        }
+
+      }
+    }
+
+    shutdown()
+
+
   }
 
 
-  def openSocket(): ServerSocketChannel = {
+  private def accept(key: SelectionKey): Unit = {
+    val ssc = key.channel().asInstanceOf[ServerSocketChannel]
+    val sc = ssc.accept()
+    ssc.configureBlocking(false)
+    sc.register(selector, SelectionKey.OP_READ)
+  }
+
+
+  private def openSocket(): ServerSocketChannel = {
     val socketAddress =
       if (StringUtils.isBlank(host)) new InetSocketAddress(port) else new InetSocketAddress(host, port)
     val serverSocketChannel = ServerSocketChannel.open()
@@ -99,10 +127,6 @@ private class ServerThread(val host: String,
 }
 
 
-private class Processor extends Runnable {
 
-  override def run(): Unit = ???
-
-}
 
 
