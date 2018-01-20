@@ -1,7 +1,7 @@
 allprojects {
     apply plugin: 'idea'
 
-    group = 'com.zhyea.hexagon'
+    group = 'org.chobit.hexagon'
     version = '0.1-SNAPSHOT'
 }
 
@@ -18,42 +18,30 @@ subprojects {
 
     repositories {
         mavenLocal()
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         mavenCentral()
+    }
+
+    ext {
+        scalaVersion = '2.12.4'
     }
 
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
-        testCompile group: 'org.scala-lang', name: 'scala-library', version: '2.12.4'
-        scalaCompiler group: 'org.scala-lang', name: 'scala-compiler', version: '2.12.4'
+        compile group: 'org.scala-lang', name: 'scala-compiler', version: scalaVersion
     }
 
-    tasks.withType(ScalaCompile) {
-        scalaClasspath = configurations.scalaCompiler
-    }
 
 }
 
 
 
-project(':core') {
-
-    dependencies {
-        compile group: 'org.apache.curator', name: 'curator-client', version: '4.0.0'
-        compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: '0.6.51'
-        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-    }
-}
 
 
 
-project(':api') {
-
-}
 
 
 
-project(':sample') {
-/*    dependencies {
-        compile project(":core")
-    }*/
-}
+
+
+
