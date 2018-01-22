@@ -117,6 +117,7 @@ private class ServerThread(val host: String,
 
   private def accept(key: SelectionKey): Unit = {
     val ssc = key.channel().asInstanceOf[ServerSocketChannel]
+    ssc.socket().setReceiveBufferSize(receiveBufferSize)
     val sc = ssc.accept()
     ssc.configureBlocking(false)
     sc.register(selector, SelectionKey.OP_READ)
