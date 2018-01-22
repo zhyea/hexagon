@@ -68,10 +68,10 @@ private abstract class AbstractServerThread() extends Runnable with Logging {
 }
 
 
-private class ServerThread(val host: String,
-                           val port: Int,
-                           val sendBufferSize: Int,
-                           val receiveBufferSize: Int) extends AbstractServerThread with Logging {
+private class Acceptor(val host: String,
+                       val port: Int,
+                       val sendBufferSize: Int,
+                       val receiveBufferSize: Int) extends AbstractServerThread with Logging {
 
   val serverSocketChannel: ServerSocketChannel = openSocket()
 
@@ -121,6 +121,9 @@ private class ServerThread(val host: String,
     val sc = ssc.accept()
     ssc.configureBlocking(false)
     sc.register(selector, SelectionKey.OP_READ)
+    sc.socket().setTcpNoDelay(true)
+    sc.socket()
+
   }
 
 
@@ -142,6 +145,16 @@ private class ServerThread(val host: String,
   }
 }
 
+
+
+
+private class Processor extends AbstractServerThread{
+
+
+  override def run(): Unit = ???
+
+
+}
 
 
 
