@@ -3,11 +3,13 @@ package hexagon.network
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel, SocketChannel}
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.{ConcurrentLinkedDeque, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.exceptions.HexagonConnectException
 import hexagon.tools.{Logging, StringUtils}
+
+import scala.collection.immutable.Queue
 
 
 class SocketServer(private val port: Int,
@@ -71,7 +73,8 @@ private abstract class AbstractServerThread() extends Runnable with Logging {
 private class Acceptor(val host: String,
                        val port: Int,
                        val sendBufferSize: Int,
-                       val receiveBufferSize: Int) extends AbstractServerThread with Logging {
+                       val receiveBufferSize: Int,
+                       val processors: Array[Processor]) extends AbstractServerThread with Logging {
 
   val serverSocketChannel: ServerSocketChannel = openSocket()
 
@@ -89,29 +92,15 @@ private class Acceptor(val host: String,
         while (iter.hasNext) {
           key = iter.next()
           iter.remove()
-          handle(key)
+          if (key.isAcceptable)
+            accept(key)
+          else
+            throw new IllegalStateException("Not accept key in acceptor thread.")
         }
-
       }
     }
 
     shutdownComplete()
-
-
-  }
-
-
-  private def handle(key: SelectionKey): Unit = {
-    if (key.isAcceptable)
-      accept(key)
-    if (key.isReadable)
-      read(key)
-  }
-
-  private def read(key: SelectionKey): Unit = {
-    val sc = key.channel().asInstanceOf[SocketChannel]
-    val buffer = ByteBuffer.allocate(1000)
-
   }
 
 
@@ -122,7 +111,14 @@ private class Acceptor(val host: String,
     ssc.configureBlocking(false)
     sc.register(selector, SelectionKey.OP_READ)
     sc.socket().setTcpNoDelay(true)
-    sc.socket()
+    sc.socket().setSendBufferSize(sendBufferSize)
+
+
+    debug("Accepted connection from {} on {}. sendBufferSize [actual|requested]: [{}|{}] receiveBufferSize [actual|requested]: [{}|{}]",
+      sc.socket.getInetAddress, sc.socket.getLocalSocketAddress,
+      sc.socket.getSendBufferSize, sendBufferSize,
+      sc.socket.getReceiveBufferSize, receiveBufferSize)
+
 
   }
 
@@ -146,12 +142,32 @@ private class Acceptor(val host: String,
 }
 
 
+private class Processor extends AbstractServerThread {
 
 
-private class Processor extends AbstractServerThread{
+  private val newConnection = new ConcurrentLinkedDeque[SocketChannel]()
 
 
-  override def run(): Unit = ???
+  override def run(): Unit = {
+    startupComplete()
+    while (isRunning) {
+
+    }
+  }
+
+
+  def accept(sc: SocketChannel): Unit = {
+    newConnection.add(sc)
+    wakeup()
+  }
+
+
+  private def configNewConnections(): Unit = {
+    while (!newConnection.isEmpty) {
+      val sc = newConnection.poll()
+      sc.register(selector, SelectionKey.OP_READ)
+    }
+  }
 
 
 }

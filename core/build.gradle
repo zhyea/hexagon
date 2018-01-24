@@ -1,9 +1,6 @@
-
 project(':core') {
 
     dependencies {
-        compile group: 'org.apache.curator', name: 'curator-client', version: '4.0.0'
-        compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: '0.6.51'
         compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     }
 }

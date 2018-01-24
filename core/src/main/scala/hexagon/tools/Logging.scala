@@ -6,6 +6,11 @@ trait Logging {
 
   private val logger: Logger = LoggerFactory.getLogger(this.getClass)
 
+
+  def debug(format: String, args: Any*) = {
+    logger.debug(format, args)
+  }
+
   def trace(format: String, args: Any*) = {
     logger.trace(format, args)
   }
