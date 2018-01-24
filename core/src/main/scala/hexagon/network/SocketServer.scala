@@ -63,9 +63,6 @@ private abstract class AbstractServerThread() extends Runnable with Logging {
   def shutdownComplete(): Unit = shutdownLatch.countDown()
 
 
-  def wakeup(): Selector = selector.wakeup()
-
-
   def isRunning: Boolean = alive.get()
 }
 
@@ -142,7 +139,7 @@ private class Acceptor(val host: String,
 }
 
 
-private class Processor extends AbstractServerThread {
+private class Processor(val id: Int) extends AbstractServerThread {
 
 
   private val newConnection = new ConcurrentLinkedDeque[SocketChannel]()
@@ -156,9 +153,15 @@ private class Processor extends AbstractServerThread {
   }
 
 
+  def read(key: SelectionKey): Unit = {
+    val sc = key.channel().asInstanceOf[SocketChannel]
+    key.attachment()
+  }
+
+
   def accept(sc: SocketChannel): Unit = {
     newConnection.add(sc)
-    wakeup()
+    selector.wakeup()
   }
 
 
