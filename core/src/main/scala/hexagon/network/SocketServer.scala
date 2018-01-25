@@ -1,7 +1,6 @@
 package hexagon.network
 
 import java.net.InetSocketAddress
-import java.nio.ByteBuffer
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel, SocketChannel}
 import java.util.concurrent.{ConcurrentLinkedDeque, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -9,11 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import hexagon.exceptions.HexagonConnectException
 import hexagon.tools.{Logging, StringUtils}
 
-import scala.collection.immutable.Queue
-
-
-class SocketServer(private val port: Int,
-                   private val numProcessorThreads: Int) {
+private[hexagon] class SocketServer(private val port: Int,
+                                    private val numProcessorThreads: Int) {
 
 
   private var selector: Selector = _
@@ -79,6 +75,7 @@ private class Acceptor(val host: String,
     serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT)
     startupComplete()
 
+    var currentProcessor = 0
     while (isRunning) {
       val readyKeyNum = selector.select(1000)
       if (readyKeyNum > 0) {
@@ -90,9 +87,11 @@ private class Acceptor(val host: String,
           key = iter.next()
           iter.remove()
           if (key.isAcceptable)
-            accept(key)
+            accept(key, processors(currentProcessor))
           else
             throw new IllegalStateException("Not accept key in acceptor thread.")
+
+          currentProcessor = (currentProcessor + 1) % processors.length
         }
       }
     }
@@ -101,7 +100,7 @@ private class Acceptor(val host: String,
   }
 
 
-  private def accept(key: SelectionKey): Unit = {
+  private def accept(key: SelectionKey, processor: Processor): Unit = {
     val ssc = key.channel().asInstanceOf[ServerSocketChannel]
     ssc.socket().setReceiveBufferSize(receiveBufferSize)
     val sc = ssc.accept()
@@ -110,13 +109,12 @@ private class Acceptor(val host: String,
     sc.socket().setTcpNoDelay(true)
     sc.socket().setSendBufferSize(sendBufferSize)
 
-
     debug("Accepted connection from {} on {}. sendBufferSize [actual|requested]: [{}|{}] receiveBufferSize [actual|requested]: [{}|{}]",
       sc.socket.getInetAddress, sc.socket.getLocalSocketAddress,
       sc.socket.getSendBufferSize, sendBufferSize,
       sc.socket.getReceiveBufferSize, receiveBufferSize)
 
-
+    processor.accept(sc)
   }
 
 
