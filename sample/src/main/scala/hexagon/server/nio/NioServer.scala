@@ -8,8 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class NioServer(private val port: Int) {
 
 
-  private val isRunning: AtomicBoolean = new AtomicBoolean(false)
-
   private var selector: Selector = null
   private var serverChannel: ServerSocketChannel = null
 
@@ -32,21 +30,6 @@ class NioServer(private val port: Int) {
 
   def start(): Unit = {
 
-    while (isRunning.get()) {
-      selector.select(1000)
-      val keys = selector.selectedKeys()
-      val iter = keys.iterator()
-
-      var key: SelectionKey = null
-      while (iter.hasNext) {
-        key = iter.next()
-        iter.remove()
-        handle(key)
-      }
-    }
-
-    if (null != selector)
-      selector.close()
   }
 
 
@@ -65,13 +48,6 @@ class NioServer(private val port: Int) {
     }
   }
 
-
-  private def accept(key: SelectionKey): Unit = {
-    val ssc = key.channel().asInstanceOf[ServerSocketChannel]
-    val sc = ssc.accept()
-    sc.configureBlocking(false)
-    sc.register(selector, SelectionKey.OP_READ)
-  }
 
 
   private def read(key: SelectionKey): Unit = {
@@ -98,5 +74,63 @@ class NioServer(private val port: Int) {
     buffer.put(bytes)
     buffer.flip()
     sc.write(buffer)
+  }
+}
+
+
+abstract class AbstractServerThread extends Runnable {
+
+
+  private val alive: AtomicBoolean = new AtomicBoolean(false)
+
+  val selector = Selector.open
+
+
+  def isRunning = alive.get()
+
+  def shutdown(): Unit = {
+    if (null != selector) selector.close()
+    alive.set(false)
+  }
+
+}
+
+
+class Acceptor extends AbstractServerThread {
+
+  override def run(): Unit = {
+    while (isRunning) {
+      selector.select(1000)
+      val keys = selector.selectedKeys()
+      val iter = keys.iterator()
+
+      var key: SelectionKey = null
+      while (iter.hasNext) {
+        key = iter.next()
+        iter.remove()
+        if (key.isAcceptable)
+          accept(key)
+        else
+          throw new RuntimeException("Illegal key state.")
+      }
+    }
+    shutdown()
+  }
+
+
+  def accept(key: SelectionKey) = {
+    val ssc = key.channel().asInstanceOf[ServerSocketChannel]
+    val sc = ssc.accept()
+    sc.configureBlocking(false)
+    sc.register(selector, SelectionKey.OP_READ)
+  }
+
+}
+
+
+class Processor extends AbstractServerThread {
+
+  override def run(): Unit = {
+
   }
 }
