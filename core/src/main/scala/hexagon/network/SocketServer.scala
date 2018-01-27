@@ -2,7 +2,7 @@ package hexagon.network
 
 import java.net.InetSocketAddress
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel, SocketChannel}
-import java.util.concurrent.{ConcurrentLinkedDeque, CountDownLatch}
+import java.util.concurrent.{ConcurrentLinkedDeque, ConcurrentLinkedQueue, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.exceptions.HexagonConnectException
@@ -137,10 +137,11 @@ private class Acceptor(val host: String,
 }
 
 
-private class Processor(val id: Int) extends AbstractServerThread {
+private class Processor(val id: Int,
+                        val maxRequestSize: Int) extends AbstractServerThread {
 
 
-  private val newConnection = new ConcurrentLinkedDeque[SocketChannel]()
+  private val newConnection = new ConcurrentLinkedQueue[SocketChannel]()
 
 
   override def run(): Unit = {
@@ -152,8 +153,11 @@ private class Processor(val id: Int) extends AbstractServerThread {
 
 
   def read(key: SelectionKey): Unit = {
-    val sc = key.channel().asInstanceOf[SocketChannel]
-    key.attachment()
+    var request = key.attachment().asInstanceOf[Receive]
+    if (null == key.attachment) {
+      request = new BoundedByteBufferReceive(maxRequestSize)
+      key.attach(request)
+    }
   }
 
 

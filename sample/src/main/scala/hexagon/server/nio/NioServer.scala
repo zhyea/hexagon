@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class NioServer(private val port: Int) {
 
 
-  private var selector: Selector = null
-  private var serverChannel: ServerSocketChannel = null
+  private var selector: Selector = _
+  private var serverChannel: ServerSocketChannel = _
 
   try {
     selector = Selector.open
@@ -20,7 +20,6 @@ class NioServer(private val port: Int) {
 
     serverChannel.register(selector, SelectionKey.OP_ACCEPT)
 
-    isRunning.set(true)
 
     println("Server started. Port is : " + port)
   } catch {
@@ -30,41 +29,6 @@ class NioServer(private val port: Int) {
 
   def start(): Unit = {
 
-  }
-
-
-  def stop(): Unit = {
-    isRunning.set(false)
-  }
-
-  def handle(key: SelectionKey): Unit = {
-    if (key.isValid) {
-      if (key.isAcceptable) {
-        accept(key)
-      }
-      if (key.isReadable) {
-        read(key)
-      }
-    }
-  }
-
-
-
-  private def read(key: SelectionKey): Unit = {
-    val sc = key.channel().asInstanceOf[SocketChannel]
-    val buffer = ByteBuffer.allocate(1024)
-    val read = sc.read(buffer)
-    if (read > 0) {
-      buffer.flip()
-      val bytes = new Array[Byte](buffer.remaining())
-      buffer.get(bytes)
-      println(new String(bytes))
-
-      write(sc)
-    } else if (read < 0) {
-      key.cancel()
-      sc.close()
-    }
   }
 
 
@@ -83,7 +47,7 @@ abstract class AbstractServerThread extends Runnable {
 
   private val alive: AtomicBoolean = new AtomicBoolean(false)
 
-  val selector = Selector.open
+  val selector:Selector = Selector.open
 
 
   def isRunning = alive.get()
@@ -130,7 +94,16 @@ class Acceptor extends AbstractServerThread {
 
 class Processor extends AbstractServerThread {
 
+
   override def run(): Unit = {
 
   }
+
+
+  private def read(key: SelectionKey): Unit = {
+    key
+  }
 }
+
+
+class Receive(id: Int, message: String)
