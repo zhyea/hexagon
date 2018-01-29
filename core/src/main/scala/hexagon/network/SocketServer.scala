@@ -1,33 +1,28 @@
 package hexagon.network
 
+import java.io.EOFException
 import java.net.InetSocketAddress
 import java.nio.channels.{SelectionKey, Selector, ServerSocketChannel, SocketChannel}
-import java.util.concurrent.{ConcurrentLinkedDeque, ConcurrentLinkedQueue, CountDownLatch}
+import java.util.concurrent.{ConcurrentLinkedQueue, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
 
-import hexagon.exceptions.HexagonConnectException
+import hexagon.exceptions.{HexagonConnectException, InvalidRequestException}
 import hexagon.tools.{Logging, StringUtils}
 
-private[hexagon] class SocketServer(private val port: Int,
-                                    private val numProcessorThreads: Int) {
-
-
-  private var selector: Selector = _
-  private var serverSocketChannel: ServerSocketChannel = _
+private[hexagon] class SocketServer(private val host: String,
+                                    private val port: Int,
+                                    private val numProcessorThreads: Int,
+                                    private val sendBufferSize: Int,
+                                    private val receiveBufferSize: Int) {
+  private val processors = new Array[Processor](numProcessorThreads)
+  private val acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processors)
 
   def start(): Unit = {
-    selector = Selector.open()
-    serverSocketChannel = ServerSocketChannel.open()
-    serverSocketChannel.configureBlocking(false)
-    serverSocketChannel.socket().bind(new InetSocketAddress(port))
-    serverSocketChannel.register(selector, SelectionKey.OP_READ)
 
   }
 
 
   def shutdown(): Unit = {
-    if (null != serverSocketChannel) serverSocketChannel.close()
-    if (null != selector) selector.close()
   }
 
 }
@@ -147,10 +142,38 @@ private class Processor(val id: Int,
   override def run(): Unit = {
     startupComplete()
     while (isRunning) {
+      configNewConnections()
+      val ready = selector.select(500)
+      if (ready > 0) {
+        val keys = selector.selectedKeys()
+        val iter = keys.iterator()
+        while (iter.hasNext && isRunning) {
+          val key = iter.next()
+          val remoteHost = key.channel().asInstanceOf[SocketChannel].getRemoteAddress
+          try {
+            iter.remove()
 
+            if (key.isReadable) {
+              read(key)
+            } else if (key.isWritable) {
+              write(key)
+            } else if (!key.isValid) {
+              close(key)
+            } else {
+              throw new IllegalStateException("Unrecognized state for processor thread.")
+            }
+          } catch {
+            case e: EOFException => info(s"Closing socket for $remoteHost."); close(key)
+            case e: InvalidRequestException => info(s"Closing socket for $remoteHost due to invalid request.", e); close(key)
+            case e: Throwable => error(s"Closing socket for $remoteHost because of error. ", e); close(key)
+          }
+        }
+      }
     }
+    debug("Closing selector..")
+    swallow(selector.close)
+    shutdownComplete()
   }
-
 
   def handle(key: SelectionKey, request: Receive): Option[Send] = {
     ???
@@ -217,8 +240,6 @@ private class Processor(val id: Int,
       sc.register(selector, SelectionKey.OP_READ)
     }
   }
-
-
 }
 
 
