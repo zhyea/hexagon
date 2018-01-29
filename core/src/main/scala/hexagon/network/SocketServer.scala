@@ -152,12 +152,56 @@ private class Processor(val id: Int,
   }
 
 
+  def handle(key: SelectionKey, request: Receive): Option[Send] = {
+    ???
+  }
+
+
   def read(key: SelectionKey): Unit = {
+    val sc = key.channel().asInstanceOf[SocketChannel]
     var request = key.attachment().asInstanceOf[Receive]
     if (null == key.attachment) {
       request = new BoundedByteBufferReceive(maxRequestSize)
       key.attach(request)
     }
+    val read = request.readFrom(sc)
+    trace(s"$read bytes read from ${sc.getRemoteAddress}")
+    if (read < 0) {
+      close(key)
+    } else if (request.complete) {
+      val response = handle(key, request)
+      key.attach(null)
+      if (response.isDefined) {
+        key.attach(response.getOrElse(None))
+        key.interestOps(SelectionKey.OP_WRITE)
+      }
+    } else {
+      key.interestOps(SelectionKey.OP_READ)
+      selector.wakeup()
+    }
+  }
+
+
+  def write(key: SelectionKey): Unit = {
+    val sc = key.channel().asInstanceOf[SocketChannel]
+    val response = key.attachment().asInstanceOf[Send]
+    val written = response.writeTo(sc)
+    trace(s"$written bytes written to ${sc.getRemoteAddress}")
+    if (response.complete) {
+      key.attach(null)
+      key.interestOps(SelectionKey.OP_READ)
+    } else {
+      key.interestOps(SelectionKey.OP_WRITE)
+    }
+  }
+
+
+  def close(key: SelectionKey): Unit = {
+    val channel = key.channel().asInstanceOf[SocketChannel]
+    swallow(channel.socket().close())
+    swallow(channel.close())
+    key.attach(null)
+    key.cancel()
   }
 
 

@@ -27,4 +27,16 @@ trait Logging {
     logger.trace(format, args)
   }
 
+  def swallow(action: => Unit, message: String) = {
+    try {
+      action
+    } catch {
+      case e: Exception => error(if (null == message) e.getMessage else message, e)
+    }
+  }
+
+  def swallow(action: => Unit) = {
+    swallow(action, null)
+  }
+
 }
