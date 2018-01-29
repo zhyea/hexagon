@@ -1,8 +1,11 @@
 package hexagon.network
 
-private [hexagon] object handler {
+import java.nio.channels.SelectionKey
+
+private[hexagon] object handler {
 
 
+  type ProcessorHandler = (SelectionKey, Receive) => Option[Send]
 
 
 }

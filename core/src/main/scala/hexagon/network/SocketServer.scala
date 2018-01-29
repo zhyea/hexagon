@@ -7,22 +7,36 @@ import java.util.concurrent.{ConcurrentLinkedQueue, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.exceptions.{HexagonConnectException, InvalidRequestException}
-import hexagon.tools.{Logging, StringUtils}
+import hexagon.tools.{Logging, StringUtils, Utils}
 
 private[hexagon] class SocketServer(private val host: String,
                                     private val port: Int,
                                     private val numProcessorThreads: Int,
                                     private val sendBufferSize: Int,
-                                    private val receiveBufferSize: Int) {
+                                    private val receiveBufferSize: Int,
+                                    private val maxRequestSize: Int = Int.MaxValue) extends Logging {
+
   private val processors = new Array[Processor](numProcessorThreads)
-  private val acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processors)
+  private var acceptor: Acceptor = null
 
   def start(): Unit = {
-
+    info("Starting socket server")
+    for (i <- 0 until numProcessorThreads) {
+      processors(i) = new Processor(i, maxRequestSize)
+      Utils.newThread(s"Hexagon processor-$i", processors(i), false).start()
+    }
+    acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processors)
+    Utils.newThread("Hexagon acceptor", acceptor, false).start()
+    acceptor.awaitStartup()
+    info("Start completed.")
   }
 
 
   def shutdown(): Unit = {
+    info("Shutting down.")
+    if (null != acceptor) acceptor.shutdown()
+    for (p <- processors) p.shutdown()
+    info("Shutdown completed.")
   }
 
 }
@@ -135,9 +149,7 @@ private class Acceptor(val host: String,
 private class Processor(val id: Int,
                         val maxRequestSize: Int) extends AbstractServerThread {
 
-
   private val newConnection = new ConcurrentLinkedQueue[SocketChannel]()
-
 
   override def run(): Unit = {
     startupComplete()
