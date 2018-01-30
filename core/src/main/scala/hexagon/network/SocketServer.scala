@@ -19,7 +19,7 @@ private[hexagon] class SocketServer(private val host: String,
   private val processors = new Array[Processor](numProcessorThreads)
   private var acceptor: Acceptor = null
 
-  def start(): Unit = {
+  def startup(): Unit = {
     info("Starting socket server")
     for (i <- 0 until numProcessorThreads) {
       processors(i) = new Processor(i, maxRequestSize)
@@ -253,7 +253,3 @@ private class Processor(val id: Int,
     }
   }
 }
-
-
-
-

@@ -15,7 +15,18 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
   private var socketServer: SocketServer = _
 
   def startup(): Unit = {
+    info("Starting hexagon server.")
     isRunning.set(true)
+
+    socketServer = new SocketServer(config.host,
+      config.port,
+      config.numNetworkThreads,
+      config.socketSendBuffer,
+      config.socketReceiveBuffer,
+      config.maxMessageSize)
+    socketServer.startup()
+
+    info("Hexagon server started")
   }
 
 

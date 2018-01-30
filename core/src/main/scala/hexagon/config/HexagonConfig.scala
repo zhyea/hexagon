@@ -17,5 +17,7 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
 
   val socketReceiveBuffer: Int = PropKit.getInt(props, "socket.receive.buffer", 1024)
 
+  val maxMessageSize: Int = PropKit.getInt(props, "max.message.size", Int.MaxValue)
+
 
 }

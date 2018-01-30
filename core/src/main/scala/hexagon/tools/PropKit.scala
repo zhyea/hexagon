@@ -1,10 +1,17 @@
 package hexagon.tools
 
+import java.io.FileInputStream
 import java.util.Properties
 
 
 object PropKit {
 
+
+  def load(path: String): Properties = {
+    val props = new Properties()
+    props.load(new FileInputStream(path))
+    props
+  }
 
   def getString(props: Properties, key: String, defaultValue: String): String = {
     if (props.containsKey(key))
