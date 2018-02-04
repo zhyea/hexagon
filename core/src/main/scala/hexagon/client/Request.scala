@@ -1,8 +1,13 @@
 package hexagon.client
 
-class Request {
+
+object Request {
+
+}
 
 
+class Request(private val topic: String,
+              private val message: Array[Byte]) {
 
 
 }
