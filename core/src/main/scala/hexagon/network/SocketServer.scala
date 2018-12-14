@@ -7,7 +7,7 @@ import java.util.concurrent.{ConcurrentLinkedQueue, CountDownLatch}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.exceptions.{HexagonConnectException, InvalidRequestException}
-import hexagon.tools.{Logging, StringUtils, Utils}
+import hexagon.tools.{Logging, StringKit, Threads}
 
 private[hexagon] class SocketServer(private val host: String,
                                     private val port: Int,
@@ -17,16 +17,16 @@ private[hexagon] class SocketServer(private val host: String,
                                     private val maxRequestSize: Int = Int.MaxValue) extends Logging {
 
   private val processors = new Array[Processor](numProcessorThreads)
-  private var acceptor: Acceptor = null
+  private var acceptor: Acceptor = _
 
   def startup(): Unit = {
     info("Starting socket server")
     for (i <- 0 until numProcessorThreads) {
       processors(i) = new Processor(i, maxRequestSize)
-      Utils.newThread(s"Hexagon processor-$i", processors(i), false).start()
+      Threads.newThread(s"Hexagon processor-$i", processors(i), false).start()
     }
     acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processors)
-    Utils.newThread("Hexagon acceptor", acceptor, false).start()
+    Threads.newThread("Hexagon acceptor", acceptor, false).start()
     acceptor.awaitStartup()
     info("Start completed.")
   }
@@ -129,7 +129,7 @@ private class Acceptor(val host: String,
 
   private def openSocket(): ServerSocketChannel = {
     val socketAddress =
-      if (StringUtils.isBlank(host)) new InetSocketAddress(port) else new InetSocketAddress(host, port)
+      if (StringKit.isBlank(host)) new InetSocketAddress(port) else new InetSocketAddress(host, port)
     val serverSocketChannel = ServerSocketChannel.open()
     serverSocketChannel.configureBlocking(false)
     try {
