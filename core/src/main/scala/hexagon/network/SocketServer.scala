@@ -1,9 +1,5 @@
 package hexagon.network
 
-import java.nio.channels.Selector
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicBoolean
-
 import hexagon.tools.{Logging, Threads}
 
 private[hexagon] class SocketServer(private val host: String,
@@ -20,12 +16,12 @@ private[hexagon] class SocketServer(private val host: String,
     info("Starting socket server")
     for (i <- 0 until numProcessorThreads) {
       processors(i) = new Processor(i, maxRequestSize)
-      Threads.newThread(s"Hexagon processor-$i", processors(i), false).start()
+      Threads.newThread(s"Hexagon-processor-$i", processors(i), false).start()
     }
     acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processors)
-    Threads.newThread("Hexagon acceptor", acceptor, false).start()
+    Threads.newThread("Hexagon-acceptor", acceptor, false).start()
     acceptor.awaitStartup()
-    info("Start completed.")
+    info("Start socket server completed.")
   }
 
 

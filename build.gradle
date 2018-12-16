@@ -7,16 +7,11 @@ allprojects {
 
 
 subprojects {
+    
     apply plugin: 'scala'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
-
-    repositories {
-        mavenLocal()
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-        mavenCentral()
-    }
 
     ext {
         scalaVersion = '2.12.4'
@@ -27,7 +22,7 @@ subprojects {
         compile group: 'org.scala-lang', name: 'scala-compiler', version: scalaVersion
     }
 
-    task "mkdirs"  {
+    task "mkdirs" {
         sourceSets*.scala.srcDirs*.each { it.mkdirs() }
         sourceSets*.resources.srcDirs*.each { it.mkdirs() }
     }

@@ -6,7 +6,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
 
-private[hexagon] class Processor(val id: Int, val maxRequestSize: Int)
+private class Processor(val id: Int, val maxRequestSize: Int)
+
   extends AbstractServerThread {
 
   private val newConnection = new ConcurrentLinkedQueue[SocketChannel]()
@@ -18,12 +19,12 @@ private[hexagon] class Processor(val id: Int, val maxRequestSize: Int)
       val ready = selector.select(500)
       if (ready > 0) {
         val keys = selector.selectedKeys()
-        val iter = keys.iterator()
-        while (iter.hasNext && isRunning) {
-          val key = iter.next()
+        val itr = keys.iterator()
+        while (itr.hasNext && isRunning) {
+          val key = itr.next()
           val remoteHost = key.channel().asInstanceOf[SocketChannel].getRemoteAddress
           try {
-            iter.remove()
+            itr.remove()
 
             if (key.isReadable) {
               read(key)

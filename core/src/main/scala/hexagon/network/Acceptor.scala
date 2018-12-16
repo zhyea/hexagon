@@ -26,12 +26,12 @@ private class Acceptor(val host: String,
       val readyKeyNum = selector.select(1000)
       if (readyKeyNum > 0) {
         val readyKeys = selector.selectedKeys()
-        val iter = readyKeys.iterator()
+        val itr = readyKeys.iterator()
 
         var key: SelectionKey = null
-        while (iter.hasNext) {
-          key = iter.next()
-          iter.remove()
+        while (itr.hasNext) {
+          key = itr.next()
+          itr.remove()
           if (key.isAcceptable)
             accept(key, processors(currentProcessor))
           else
