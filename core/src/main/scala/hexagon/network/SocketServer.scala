@@ -14,21 +14,26 @@ private[hexagon] class SocketServer(private val host: String,
 
   def startup(): Unit = {
     info("Starting socket server")
+
     for (i <- 0 until numProcessorThreads) {
       processors(i) = new Processor(i, maxRequestSize)
       Threads.newThread(s"Hexagon-processor-$i", processors(i), false).start()
     }
+
     acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processors)
     Threads.newThread("Hexagon-acceptor", acceptor, false).start()
     acceptor.awaitStartup()
+
     info("Start socket server completed.")
   }
 
 
   def shutdown(): Unit = {
     info("Shutting down.")
+
     if (null != acceptor) acceptor.shutdown()
     processors.foreach(_.shutdown())
+
     info("Shutdown completed.")
   }
 
