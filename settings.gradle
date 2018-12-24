@@ -1,3 +1,2 @@
-
-include 'core', 'sample', 'api'
+include 'core', 'api'
 

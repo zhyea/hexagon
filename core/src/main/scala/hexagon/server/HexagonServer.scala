@@ -24,6 +24,7 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
       config.socketSendBuffer,
       config.socketReceiveBuffer,
       config.maxMessageSize)
+
     socketServer.startup()
 
     info("Hexagon server started")

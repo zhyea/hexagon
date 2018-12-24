@@ -1,5 +1,0 @@
-package hexagon
-
-class Test {
-
-}

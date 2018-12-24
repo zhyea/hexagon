@@ -1,6 +1,0 @@
-
-project(':sample') {
-/*    dependencies {
-        compile project(":core")
-    }*/
-}

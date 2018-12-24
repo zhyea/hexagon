@@ -19,6 +19,7 @@ object Hexagon extends Logging {
       val config = new HexagonConfig(props)
 
       val serverStartable = new HexagonServerStartable(config)
+
       Runtime.getRuntime
         .addShutdownHook(new Thread(() => serverStartable.shutdown()))
 

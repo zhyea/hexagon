@@ -28,7 +28,7 @@ private[hexagon] class SocketServer(private val host: String,
   def shutdown(): Unit = {
     info("Shutting down.")
     if (null != acceptor) acceptor.shutdown()
-    for (p <- processors) p.shutdown()
+    processors.foreach(_.shutdown())
     info("Shutdown completed.")
   }
 

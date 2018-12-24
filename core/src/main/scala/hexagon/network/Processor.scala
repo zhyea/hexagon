@@ -6,9 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
 
-private class Processor(val id: Int, val maxRequestSize: Int)
-
-  extends AbstractServerThread {
+private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractServerThread {
 
   private val newConnection = new ConcurrentLinkedQueue[SocketChannel]()
 
@@ -36,8 +34,8 @@ private class Processor(val id: Int, val maxRequestSize: Int)
               throw new IllegalStateException("Unrecognized state for processor thread.")
             }
           } catch {
-            case e: EOFException => info(s"Closing socket for $remoteHost."); close(key)
-            case e: InvalidRequestException => info(s"Closing socket for $remoteHost due to invalid request.", e); close(key)
+            case e: EOFException => error(s"Closing socket for $remoteHost.", e); close(key)
+            case e: InvalidRequestException => error(s"Closing socket for $remoteHost due to invalid request.", e); close(key)
             case e: Throwable => error(s"Closing socket for $remoteHost because of error. ", e); close(key)
           }
         }

@@ -9,11 +9,16 @@ object PropKit {
 
   def load(path: String): Properties = {
     val props = new Properties()
-    props.load(new FileInputStream(path))
-    props
+    val in = new FileInputStream(path)
+    try {
+      props.load(in)
+      props
+    } finally {
+      if (null != in) in.close()
+    }
   }
 
-  def getString(props: Properties, key: String, defaultValue: String): String = {
+  def getString(props: Properties, key: String, defaultValue: String = null): String = {
     if (props.containsKey(key))
       props.getProperty(key)
     else
@@ -21,10 +26,7 @@ object PropKit {
   }
 
 
-  def getString(props: Properties, key: String): String = getString(props, key, null)
-
-
-  def getInt(props: Properties, key: String, defaultValue: Int): Int = {
+  def getInt(props: Properties, key: String, defaultValue: Int = 0): Int = {
     if (props.containsKey(key))
       props.getProperty(key).toInt
     else
@@ -32,5 +34,4 @@ object PropKit {
   }
 
 
-  def getInt(props: Properties, key: String): Int = getInt(props, key, 0)
 }

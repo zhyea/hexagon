@@ -2,22 +2,22 @@ package hexagon.config
 
 import java.util.Properties
 
-import hexagon.tools.PropKit
+import hexagon.tools.PropKit._
 
 private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(props) {
 
 
-  val port: Int = PropKit.getInt(props, "port", 9093)
+  val port: Int = getInt(props, "port", 8190)
 
-  val host: String = PropKit.getString(props, "host", "127.0.0.1")
+  val host: String = getString(props, "host", "127.0.0.1")
 
-  val numNetworkThreads: Int = PropKit.getInt(props, "num.network.threads", Runtime.getRuntime.availableProcessors())
+  val numNetworkThreads: Int = getInt(props, "num.network.threads", Runtime.getRuntime.availableProcessors())
 
-  val socketSendBuffer: Int = PropKit.getInt(props, "socket.send.buffer", 1024)
+  val socketSendBuffer: Int = getInt(props, "socket.send.buffer", 1024)
 
-  val socketReceiveBuffer: Int = PropKit.getInt(props, "socket.receive.buffer", 1024)
+  val socketReceiveBuffer: Int = getInt(props, "socket.receive.buffer", 1024)
 
-  val maxMessageSize: Int = PropKit.getInt(props, "max.message.size", Int.MaxValue)
+  val maxMessageSize: Int = getInt(props, "max.message.size", Int.MaxValue)
 
 
 }
