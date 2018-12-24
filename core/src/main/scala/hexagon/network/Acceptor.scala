@@ -72,8 +72,7 @@ private class Acceptor(val host: String,
       info("Awaiting socket connection on {}:{}", socketAddress.getHostName, port)
     } catch {
       case e: Exception => {
-        throw new HexagonConnectException(
-          "Socket Server failed to bind to %s:%d : %s".format(socketAddress.getHostName, port, e.getMessage), e)
+        throw new HexagonConnectException(s"Socket Server failed to bind to ${socketAddress.getHostName}:${port} : ${e.getMessage}", e)
       }
     }
     serverSocketChannel
