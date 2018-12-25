@@ -47,6 +47,8 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
   }
 
   def handle(key: SelectionKey, request: Receive): Option[Send] = {
+
+    key.interestOps(SelectionKey.OP_WRITE)
     ???
   }
 
@@ -58,8 +60,10 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
       request = new BoundedByteBufferReceive(maxRequestSize)
       key.attach(request)
     }
+
     val read = request.readFrom(sc)
     trace(s"$read bytes read from ${sc.getRemoteAddress}")
+
     if (read < 0) {
       close(key)
     } else if (request.complete) {
