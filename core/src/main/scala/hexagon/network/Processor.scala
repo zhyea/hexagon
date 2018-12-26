@@ -46,13 +46,6 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
     shutdownComplete()
   }
 
-  def handle(key: SelectionKey, request: Receive): Option[Send] = {
-
-    key.interestOps(SelectionKey.OP_WRITE)
-    ???
-  }
-
-
   def read(key: SelectionKey): Unit = {
     val sc = key.channel().asInstanceOf[SocketChannel]
     var request = key.attachment().asInstanceOf[Receive]
@@ -77,6 +70,12 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
       key.interestOps(SelectionKey.OP_READ)
       selector.wakeup()
     }
+  }
+
+
+  private def handle(key: SelectionKey, request: Receive): Option[Send] = {
+
+    ???
   }
 
 

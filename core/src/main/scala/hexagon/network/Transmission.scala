@@ -11,14 +11,13 @@ private[hexagon] trait Transmission extends Logging {
   def complete: Boolean
 
 
-  def expectComplete(): Unit = {
+  def expectComplete(): Unit =
     if (!complete) throw new HexagonException("This operation cannot be completed on an incomplete request.")
-  }
 
 
-  def expectIncomplete(): Unit = {
+  def expectIncomplete(): Unit =
     if (complete) throw new HexagonException("This operation cannot be completed on a complete request.")
-  }
+
 
 }
 
