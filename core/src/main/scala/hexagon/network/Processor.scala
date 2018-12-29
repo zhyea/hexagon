@@ -59,7 +59,7 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 
     if (read < 0) {
       close(key)
-    } else if (request.complete) {
+    } else if (request.isCompleted) {
       val response = handle(key, request)
       key.attach(null)
       if (response.isDefined) {
@@ -84,7 +84,7 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
     val response = key.attachment().asInstanceOf[Send]
     val written = response.writeTo(sc)
     trace(s"$written bytes written to ${sc.getRemoteAddress}")
-    if (response.complete) {
+    if (response.isCompleted) {
       key.attach(null)
       key.interestOps(SelectionKey.OP_READ)
     } else {

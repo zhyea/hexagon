@@ -5,18 +5,13 @@ import java.nio.channels.ReadableByteChannel
 
 import hexagon.exceptions.InvalidRequestException
 
-class BoundedByteBufferReceive(maxSize: Int) extends Receive {
+private[hexagon] class BoundedByteBufferReceive(maxSize: Int) extends Receive {
 
-
-  private val sizeBuffer: ByteBuffer = ByteBuffer.allocate(4)
+  private val sizeBuffer: ByteBuffer = ByteBuffer.allocate(Integer.BYTES)
   private var contentBuffer: ByteBuffer = _
 
   def this() = this(Int.MaxValue)
-
-
-  var complete = false
-
-
+  
   override def buffer: ByteBuffer = {
     expectComplete()
     contentBuffer
@@ -41,7 +36,7 @@ class BoundedByteBufferReceive(maxSize: Int) extends Receive {
       channel.read(contentBuffer)
       if (!contentBuffer.hasRemaining) {
         contentBuffer.rewind()
-        complete = true
+        complete.set(true)
       }
     }
     read

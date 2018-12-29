@@ -2,21 +2,23 @@ package hexagon.network
 
 import java.nio.ByteBuffer
 import java.nio.channels.{GatheringByteChannel, ReadableByteChannel}
+import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.exceptions.HexagonException
 import hexagon.tools.Logging
 
 private[hexagon] trait Transmission extends Logging {
 
-  def complete: Boolean
+  val complete: AtomicBoolean = new AtomicBoolean(false)
+
+  final def isCompleted: Boolean = complete.get()
+
+  final def expectComplete(): Unit =
+    if (!isCompleted) throw new HexagonException("This operation cannot be completed on an incomplete request.")
 
 
-  def expectComplete(): Unit =
-    if (!complete) throw new HexagonException("This operation cannot be completed on an incomplete request.")
-
-
-  def expectIncomplete(): Unit =
-    if (complete) throw new HexagonException("This operation cannot be completed on a complete request.")
+  final def expectIncomplete(): Unit =
+    if (isCompleted) throw new HexagonException("This operation cannot be completed on a complete request.")
 
 
 }
@@ -30,7 +32,7 @@ trait Receive extends Transmission {
 
   def readComplete(channel: ReadableByteChannel): Int = {
     var totalRead = 0
-    while (!complete) {
+    while (!isCompleted) {
       totalRead += readFrom(channel)
     }
     totalRead
@@ -45,7 +47,7 @@ trait Send extends Transmission {
 
   def writeComplete(channel: GatheringByteChannel): Int = {
     var totalWrite = 0
-    while (!complete) {
+    while (!isCompleted) {
       totalWrite += writeTo(channel)
     }
     totalWrite

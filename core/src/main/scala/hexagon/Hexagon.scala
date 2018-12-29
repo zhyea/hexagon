@@ -1,6 +1,6 @@
 package hexagon
 
-import hexagon.server.{HexagonServer, HexagonServerStartable}
+import hexagon.server.{HexagonServer, HexagonServerBootable}
 import hexagon.tools.{Logging, PropKit}
 import hexagon.config.HexagonConfig
 
@@ -18,13 +18,13 @@ object Hexagon extends Logging {
       val props = PropKit.load(args(0))
       val config = new HexagonConfig(props)
 
-      val serverStartable = new HexagonServerStartable(config)
+      val serverBootable = new HexagonServerBootable(config)
 
       Runtime.getRuntime
-        .addShutdownHook(new Thread(() => serverStartable.shutdown()))
+        .addShutdownHook(new Thread(() => serverBootable.shutdown()))
 
-      serverStartable.startup()
-      serverStartable.awaitShutdown()
+      serverBootable.startup()
+      serverBootable.awaitShutdown()
 
     } catch {
       case e: Exception => error("Error during hexagon startup ", e)
