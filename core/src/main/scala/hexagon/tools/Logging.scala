@@ -8,23 +8,28 @@ trait Logging {
 
 
   def debug(format: String, args: Any*): Unit = {
-    logger.debug(format, args)
+    if (logger.isDebugEnabled)
+      logger.debug(format, args)
   }
 
   def trace(format: String, args: Any*): Unit = {
-    logger.trace(format, args)
+    if (logger.isTraceEnabled)
+      logger.trace(format, args)
   }
 
   def info(format: String, args: Any*): Unit = {
-    logger.info(format, args)
+    if (logger.isInfoEnabled)
+      logger.info(format, args)
   }
 
   def warn(format: String, args: Any*): Unit = {
-    logger.warn(format, args)
+    if (logger.isWarnEnabled)
+      logger.warn(format, args)
   }
 
   def error(format: String, args: Any*): Unit = {
-    logger.error(format, args)
+    if (logger.isErrorEnabled)
+      logger.error(format, args)
   }
 
   def swallow(action: => Unit, message: String = null): Unit = {
