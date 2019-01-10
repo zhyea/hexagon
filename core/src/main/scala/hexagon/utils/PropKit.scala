@@ -1,4 +1,4 @@
-package hexagon.tools
+package hexagon.utils
 
 import java.io.FileInputStream
 import java.util.Properties

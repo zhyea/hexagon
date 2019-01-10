@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.nio.channels.{SelectionKey, ServerSocketChannel}
 
 import hexagon.exceptions.HexagonConnectException
-import hexagon.tools.StringKit
+import hexagon.utils.StringKit
 
 
 private class Acceptor(val host: String,

@@ -1,6 +1,7 @@
 package hexagon.network
 
-import hexagon.tools.{Logging, Threads}
+import hexagon.tools.Logging
+import hexagon.utils.Threads
 
 private[hexagon] class SocketServer(private val host: String,
                                     private val port: Int,

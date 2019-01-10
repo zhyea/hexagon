@@ -2,7 +2,7 @@ package hexagon.config
 
 import java.util.Properties
 
-import hexagon.tools.PropKit._
+import hexagon.utils.PropKit._
 
 private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(props) {
 

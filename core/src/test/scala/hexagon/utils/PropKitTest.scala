@@ -1,4 +1,4 @@
-package hexagon.tools
+package hexagon.utils
 
 class PropKitTest {
 
