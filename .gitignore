@@ -3,6 +3,8 @@
 *.class
 *.log
 
+.gradle
 .idea
 *.iml
 */out/
+
