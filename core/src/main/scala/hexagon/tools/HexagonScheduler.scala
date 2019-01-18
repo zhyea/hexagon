@@ -13,7 +13,7 @@ class HexagonScheduler(val numThreads: Int,
 
   private val executor = new ScheduledThreadPoolExecutor(numThreads, new ThreadFactory {
     override def newThread(runnable: Runnable): Thread =
-      Threads.newThread(baseThreadName + threadId.get(), runnable, isDaemon)
+      Threads.newThread(baseThreadName + threadId.getAndIncrement(), runnable, isDaemon)
   })
 
   executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false)
