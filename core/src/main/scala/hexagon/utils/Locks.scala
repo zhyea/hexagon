@@ -17,7 +17,14 @@ object Locks {
 
   def inReadLock[T](lock: ReadWriteLock)(func: => T): T = inLock[T](lock.readLock())(func)
 
-  
+
   def inWriteLock[T](lock: ReadWriteLock)(func: => T): T = inLock[T](lock.writeLock())(func)
+
+
+  def sync[T](lock: Object)(func: => T): T = {
+    lock synchronized {
+      func
+    }
+  }
 
 }
