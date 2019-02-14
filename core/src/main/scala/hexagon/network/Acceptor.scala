@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.nio.channels.{SelectionKey, ServerSocketChannel}
 
 import hexagon.exceptions.HexagonConnectException
-import hexagon.utils.StringKit
+import hexagon.utils.StringUtils
 
 
 private class Acceptor(val host: String,
@@ -64,7 +64,7 @@ private class Acceptor(val host: String,
 
   private def openSocket(): ServerSocketChannel = {
     val socketAddress =
-      if (StringKit.isBlank(host)) new InetSocketAddress(port) else new InetSocketAddress(host, port)
+      if (StringUtils.isBlank(host)) new InetSocketAddress(port) else new InetSocketAddress(host, port)
     val serverSocketChannel = ServerSocketChannel.open()
     serverSocketChannel.configureBlocking(false)
     try {

@@ -1,20 +1,20 @@
 package hexagon
 
-import java.text.NumberFormat
+import java.io.FileWriter
 
-import com.google.common.hash.BloomFilter
+import scala.collection.mutable.ListBuffer
 
 object MyApp extends App {
 
-  val nf = NumberFormat.getInstance()
-  nf.setMinimumIntegerDigits(20)
-  nf.setMaximumFractionDigits(0)
-  nf.setGroupingUsed(false)
-  val s = nf.format(360)
+  println(0xEF.toByte)
+  println(Array(0xEF, 0xBB, 0xBF).map(_.toByte).toSeq)
 
-  println(s)
-
-
-  val bloomFilter = BloomFilter.create()
+  val bom = Array(0xEF, 0xBB, 0xBF).map(_.toByte)
+  val result = ListBuffer(new String(bom, "UTF8") + "title\n")
+  result += "en-chars\n"
+  result += "中文字符"
+  val w = new FileWriter("/my-file.csv")
+  result.foreach(w.write)
+  w.flush()
 
 }

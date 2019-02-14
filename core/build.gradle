@@ -4,5 +4,6 @@ project(':core') {
         compile group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
         compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
         compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-scala_2.12', version: '2.9.8'
+        compile group: 'com.google.guava', name: 'guava', version: '23.0'
     }
 }
