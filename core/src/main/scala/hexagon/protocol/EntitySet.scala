@@ -4,13 +4,12 @@ import java.nio.ByteBuffer
 import java.nio.channels.GatheringByteChannel
 
 import hexagon.exceptions.InvalidEntityException
+import hexagon.tools.Logging
 
 
 object EntitySet {
 
-
-  def entitySetSize(entities: Iterable[Entity]): Int = entities.foldLeft(0)(_ + _.size)
-
+  def entitySetSize(entities: Iterable[Entity]): Int = entities.foldLeft(0)(_ + _.serializedSize)
 
   def createByteBuffer(compressionCodec: CompressionCodec, entities: Entity*): ByteBuffer =
     compressionCodec match {
@@ -40,21 +39,21 @@ object EntitySet {
 }
 
 
-abstract class EntitySet extends Iterable[Entity] {
+abstract class EntitySet extends Iterable[EntityAndOffset] with Logging {
 
 
   def writeTo(channel: GatheringByteChannel, offset: Long, maxSize: Long): Long
 
 
-  def iterator: Iterator[Entity]
+  def iterator: Iterator[EntityAndOffset]
 
 
   def sizeInBytes: Int
 
 
   def validate(): Unit = {
-    for (entity <- this)
-      if (!entity.isValid)
+    for (entityAndOffset <- this)
+      if (!entityAndOffset.entity.isValid)
         throw new InvalidEntityException()
   }
 

@@ -14,7 +14,6 @@ object Locks {
     }
   }
 
-
   def inReadLock[T](lock: ReadWriteLock)(func: => T): T = inLock[T](lock.readLock())(func)
 
 

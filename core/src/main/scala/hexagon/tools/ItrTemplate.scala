@@ -1,7 +1,7 @@
 package hexagon.tools
 
 
-abstract class IteratorTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
+abstract class ItrTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
 
   private var state: State = NOT_READY
 
@@ -10,12 +10,12 @@ abstract class IteratorTemplate[T] extends Iterator[T] with java.util.Iterator[T
   override def hasNext: Boolean = {
     if (state == FAILED)
       throw new IllegalStateException("Iterator is in failed state.")
+
     state match {
       case DONE => false
       case READY => true
       case _ => maybeComputeNext()
     }
-
   }
 
   override def next(): T = {
@@ -43,7 +43,7 @@ abstract class IteratorTemplate[T] extends Iterator[T] with java.util.Iterator[T
     }
   }
 
-  protected def allDone(): T = {
+  protected def done(): T = {
     state = DONE
     null.asInstanceOf[T]
   }
@@ -52,7 +52,7 @@ abstract class IteratorTemplate[T] extends Iterator[T] with java.util.Iterator[T
     state = NOT_READY
   }
 
-  override def remove =
+  override def remove(): Unit =
     throw new UnsupportedOperationException("Removal not supported")
 
 }
