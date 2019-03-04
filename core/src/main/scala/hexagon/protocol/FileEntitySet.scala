@@ -95,12 +95,14 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
     entityBuffer.rewind()
     val message = new Entity(entityBuffer)
     if (!message.isValid)
-      return -1
+      -1
     else
       next
   }
 
-  override def writeTo(channel: GatheringByteChannel, offset: Long, maxSize: Long): Long = ???
+  override def writeTo(destChannel: GatheringByteChannel, writeOffset: Long, size: Long): Long = {
+    channel.transferTo(offset + writeOffset)
+  }
 
   override def iterator: Iterator[EntityAndOffset] = ???
 
