@@ -33,7 +33,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
     written
   }
 
-  override def sizeInBytes: Int = buffer.limit()
+  override def sizeInBytes: Long = buffer.limit()
 
 
   override def toString: String = {

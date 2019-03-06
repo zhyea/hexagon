@@ -48,7 +48,7 @@ abstract class EntitySet extends Iterable[EntityAndOffset] with Logging {
   def iterator: Iterator[EntityAndOffset]
 
 
-  def sizeInBytes: Int
+  def sizeInBytes: Long
 
 
   def validate(): Unit = {

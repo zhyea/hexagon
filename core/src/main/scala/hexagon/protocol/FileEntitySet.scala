@@ -101,10 +101,10 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
   }
 
   override def writeTo(destChannel: GatheringByteChannel, writeOffset: Long, size: Long): Long = {
-    channel.transferTo(offset + writeOffset)
+    channel.transferTo(offset + writeOffset, scala.math.min(size, sizeInBytes), destChannel)
   }
 
   override def iterator: Iterator[EntityAndOffset] = ???
 
-  override def sizeInBytes: Int = ???
+  override def sizeInBytes: Long = setSize.get()
 }
