@@ -1,2 +1,5 @@
 # hexagon
-多节点服务协调应用
+
+分布式BloomFilter服务。
+
+目前剽窃了大量的Kafka的概念、以及代码  
