@@ -1,6 +1,8 @@
 package hexagon.utils
 
+import java.io.{File, FileInputStream, RandomAccessFile}
 import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 import java.nio.charset.{Charset, StandardCharsets}
 
 object IOUtils {
@@ -31,4 +33,15 @@ object IOUtils {
       buffer.put(str.getBytes(encoding))
     }
   }
+
+
+  def openChannel(file: File, mutable: Boolean): FileChannel = {
+    if (mutable) {
+      new RandomAccessFile(file, "rw").getChannel
+    } else {
+      new FileInputStream(file).getChannel
+    }
+  }
+
+
 }

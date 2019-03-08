@@ -1,10 +1,12 @@
 package hexagon.protocol
 
+import java.io.File
 import java.nio.ByteBuffer
 import java.nio.channels.{FileChannel, GatheringByteChannel}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 
 import hexagon.tools.SysTime
+import hexagon.utils.IOUtils
 
 class FileEntitySet(private[protocol] val channel: FileChannel,
                     private[protocol] val offset: Long,
@@ -24,7 +26,7 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
       // set the file position to the end of the file for appending messages
       val start = SysTime.mills
       val truncated = recover()
-      info(s"Recovery succeeded in  ${SysTime.diff(start) / 1000} seconds. $truncated bytes truncated.")
+      info(s"Recovery succeeded in  ${SysTime.elapsed(start) / 1000} seconds. $truncated bytes truncated.")
     } else {
       setSize.set(channel.size())
       setHighWaterMark.set(sizeInBytes)
@@ -35,6 +37,22 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
     setHighWaterMark.set(sizeInBytes)
     debug("initializing high water mark in immutable mode: " + highWaterMark)
   }
+
+
+  def this(channel: FileChannel, mutable: Boolean) =
+    this(channel, 0, Long.MaxValue, mutable, new AtomicBoolean(false))
+
+
+  def this(file: File, mutable: Boolean) =
+    this(IOUtils.openChannel(file, mutable), mutable)
+
+
+  def this(channel: FileChannel, mutable: Boolean, needRecover: AtomicBoolean) =
+    this(channel, 0, Long.MaxValue, mutable, needRecover)
+
+
+  def this(file: File, mutable: Boolean, needRecover: AtomicBoolean) =
+    this(IOUtils.openChannel(file, mutable), mutable, needRecover)
 
 
   def highWaterMark(): Long = setHighWaterMark.get()
@@ -60,6 +78,7 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
     needRecover.set(false)
     len - validUpTo
   }
+
 
   def checkMutable(): Unit = {
     if (!mutable)
@@ -100,9 +119,41 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
       next
   }
 
+  def read(readOffset: Long, size: Long): EntitySet = {
+    new FileEntitySet(channel, this.offset + readOffset, scala.math.min(this.offset + readOffset + size, highWaterMark),
+      false, new AtomicBoolean(false))
+  }
+
   override def writeTo(destChannel: GatheringByteChannel, writeOffset: Long, size: Long): Long = {
     channel.transferTo(offset + writeOffset, scala.math.min(size, sizeInBytes), destChannel)
   }
+
+
+  def append(entities: EntitySet): Unit = {
+    checkMutable()
+    var written = 0L
+    while (written < entities.sizeInBytes)
+      written += entities.writeTo(channel, 0, entities.sizeInBytes)
+    setSize.getAndAdd(written)
+  }
+
+
+  def flush() = {
+    checkMutable()
+    channel.force(true)
+    setHighWaterMark.set(sizeInBytes)
+    debug("flush high water mark:" + highWaterMark)
+  }
+
+
+  def close() = {
+    if (mutable)
+      flush()
+    channel.close()
+  }
+
+
+
 
   override def iterator: Iterator[EntityAndOffset] = ???
 

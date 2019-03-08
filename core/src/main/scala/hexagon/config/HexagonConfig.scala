@@ -20,4 +20,10 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
   val maxMessageSize: Int = getInt(props, "max.message.size", Int.MaxValue)
 
 
+  /**
+    * 需要新增的配置项：
+    *   * 保存的bloom的数量
+    *   * 每个bloom的有效时间区间
+    */
+
 }
