@@ -88,4 +88,18 @@ private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val max
   }
 
 
+  def numberOfSegments: Int = segments.view.length
+
+
+  def close() {
+    lock synchronized {
+      for (seg <- segments.view)
+        seg.entitySet.close()
+    }
+  }
+
+
+
+
+
 }
