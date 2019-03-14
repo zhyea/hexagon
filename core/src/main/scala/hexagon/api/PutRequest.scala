@@ -26,11 +26,11 @@ class PutRequest(val topic: String,
   /**
     * topicLength + topic + entitySetSize + entity
     */
-  override def sizeInBytes: Int = 2 + topic.length + 4 + entitySet.sizeInBytes
+  override def sizeInBytes: Int = 2 + topic.length + 4 + entitySet.sizeInBytes.toInt
 
   override def writeTo(buffer: ByteBuffer): Unit = {
     IOUtils.writeShortString(buffer, topic)
-    buffer.putInt(entitySet.sizeInBytes)
+    buffer.putInt(entitySet.sizeInBytes.toInt)
     buffer.put(entitySet.serialized)
     entitySet.serialized.rewind()
   }
