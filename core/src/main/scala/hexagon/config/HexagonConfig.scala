@@ -22,8 +22,13 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
 
   /**
     * 需要新增的配置项：
+    *   * bloom expect insertions
+    *   * bloom false positive probability
     *   * 保存的bloom的数量
     *   * 每个bloom的有效时间区间
+    *
     */
+
+
 
 }

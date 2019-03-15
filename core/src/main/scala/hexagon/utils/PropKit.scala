@@ -34,4 +34,20 @@ object PropKit {
   }
 
 
+  def getLong(props: Properties, key: String, defaultValue: Long = 0): Long = {
+    if (props.containsKey(key))
+      props.getProperty(key).toLong
+    else
+      defaultValue
+  }
+
+
+  def getDouble(props: Properties, key: String, defaultValue: Double = 0): Double = {
+    if (props.containsKey(key))
+      props.getProperty(key).toDouble
+    else
+      defaultValue
+  }
+
+
 }
