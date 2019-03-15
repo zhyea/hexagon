@@ -16,7 +16,7 @@ object Threads {
   /**
     * 创建一个守护线程
     */
-  def daemonThread(name: String, func: () => Unit): Thread =
+  def daemonThread(name: String, func: => Unit): Thread =
     newThread(name, runnable(func), isDaemon = true)
 
 

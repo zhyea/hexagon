@@ -35,10 +35,10 @@ private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val max
 
   private val lastFlushedTime = new AtomicLong(SysTime.mills)
 
-  private[log] val segments: SegmentList[LogSegment] = loadSegments()
+  private[log] val segments: SegmentList = loadSegments()
 
 
-  private def loadSegments(): SegmentList[LogSegment] = {
+  private def loadSegments(): SegmentList = {
     val accum: ArrayList[LogSegment] = new ArrayList[LogSegment]
     val ls = dir.listFiles()
     if (ls != null) {
@@ -97,9 +97,6 @@ private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val max
         seg.entitySet.close()
     }
   }
-
-
-
 
 
 }
