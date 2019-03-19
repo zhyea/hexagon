@@ -7,28 +7,39 @@ import hexagon.utils.PropKit._
 private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(props) {
 
 
+  /**
+    * Server Configs
+    */
+  val brokerId: Int = getInt(props, "broker.id", -1)
+
   val port: Int = getInt(props, "port", 8190)
 
   val host: String = getString(props, "host", "127.0.0.1")
 
-  val numNetworkThreads: Int = getInt(props, "num.network.threads", Runtime.getRuntime.availableProcessors())
+  val numIoThreads: Int = getInt(props, "num.io.threads", Int.MaxValue)
 
   val socketSendBuffer: Int = getInt(props, "socket.send.buffer", 1024)
 
   val socketReceiveBuffer: Int = getInt(props, "socket.receive.buffer", 1024)
 
-  val maxMessageSize: Int = getInt(props, "max.message.size", Int.MaxValue)
+  val maxSocketRequestSize: Int = getInt(props, "socket.request.max.byte", Int.MaxValue)
 
 
   /**
-    * 需要新增的配置项：
-    *   * bloom expect insertions
-    *   * bloom false positive probability
-    *   * 保存的bloom的数量
-    *   * 每个bloom的有效时间区间
-    *
+    * BloomFilter Configs
     */
+  val bloomFilterValidHours: Int = getInt(props, "bloomfilter.valid.hours", 24);
 
+  val bloomfilterExpectInsertions: Long = getLong(props, "bloomfilter.expect.insertions", Int.MaxValue)
+
+  val bloomfilterFalsePositiveProbability: Double = getDouble(props, "bloomfilter.false.positive.probability", 0.0000000001)
+
+  val bloomfilterBackupRetentionHours: Int = getInt(props, "bloomfilter.backup.retention.hours", 24 * 30)
+
+
+  /**
+    * Zookeeper Configs
+    */
 
 
 }

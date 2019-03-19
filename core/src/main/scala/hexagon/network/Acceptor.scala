@@ -11,7 +11,7 @@ private class Acceptor(val host: String,
                        val port: Int,
                        val sendBufferSize: Int,
                        val receiveBufferSize: Int,
-                       val processors: Array[Processor]) extends AbstractServerThread {
+                       val processor: Processor) extends AbstractServerThread {
 
   val serverSocketChannel: ServerSocketChannel = openSocket()
 
@@ -19,7 +19,6 @@ private class Acceptor(val host: String,
     serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT)
     startupComplete()
 
-    var currentProcessor = 0
     while (isRunning) {
       val readyKeyNum = selector.select(1000)
       if (readyKeyNum > 0) {
@@ -31,11 +30,9 @@ private class Acceptor(val host: String,
           key = itr.next()
           itr.remove()
           if (key.isAcceptable)
-            accept(key, processors(currentProcessor))
+            accept(key, processor)
           else
             throw new IllegalStateException("Not accept key in acceptor thread.")
-
-          currentProcessor = (currentProcessor + 1) % processors.length
         }
       }
     }

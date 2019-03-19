@@ -20,10 +20,9 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
 
     socketServer = new SocketServer(config.host,
       config.port,
-      config.numNetworkThreads,
       config.socketSendBuffer,
       config.socketReceiveBuffer,
-      config.maxMessageSize)
+      config.maxSocketRequestSize)
 
     socketServer.startup()
 

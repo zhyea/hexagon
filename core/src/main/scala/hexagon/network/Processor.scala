@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
 
-private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractServerThread {
+private class Processor(val maxRequestSize: Int) extends AbstractServerThread {
 
   private val newConnection = new ConcurrentLinkedQueue[SocketChannel]()
 
@@ -60,7 +60,7 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
     if (read < 0) {
       close(key)
     } else if (request.isCompleted) {
-      val response = handle(key, request)
+      val response = process(key, request)
       key.attach(null)
       if (response.isDefined) {
         key.attach(response.getOrElse(None))
@@ -73,9 +73,13 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
   }
 
 
-  private def handle(key: SelectionKey, request: Receive): Option[Send] = {
+  private def process(key: SelectionKey, request: Receive): Option[Send] = {
 
-    ???
+    val requestTypeId:Short = request.buffer.getShort
+
+    println(requestTypeId)
+
+    None
   }
 
 
