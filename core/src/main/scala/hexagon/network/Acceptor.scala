@@ -45,7 +45,7 @@ private class Acceptor(val host: String,
     val ssc = key.channel().asInstanceOf[ServerSocketChannel]
     ssc.socket().setReceiveBufferSize(receiveBufferSize)
     val sc = ssc.accept()
-    ssc.configureBlocking(false)
+    sc.configureBlocking(false)
     sc.register(selector, SelectionKey.OP_READ)
     sc.socket().setTcpNoDelay(true)
     sc.socket().setSendBufferSize(sendBufferSize)
@@ -62,17 +62,17 @@ private class Acceptor(val host: String,
   private def openSocket(): ServerSocketChannel = {
     val socketAddress =
       if (StringUtils.isBlank(host)) new InetSocketAddress(port) else new InetSocketAddress(host, port)
-    val serverSocketChannel = ServerSocketChannel.open()
-    serverSocketChannel.configureBlocking(false)
+    val ssc = ServerSocketChannel.open()
+    ssc.configureBlocking(false)
     try {
-      serverSocketChannel.socket().bind(socketAddress)
+      ssc.socket().bind(socketAddress)
       info("Awaiting socket connection on {}:{}", socketAddress.getHostName, port)
     } catch {
       case e: Exception => {
         throw new HexagonConnectException(s"Socket Server failed to bind to ${socketAddress.getHostName}:${port} : ${e.getMessage}", e)
       }
     }
-    serverSocketChannel
+    ssc
   }
 }
 

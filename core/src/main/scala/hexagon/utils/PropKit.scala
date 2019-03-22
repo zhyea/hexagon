@@ -1,16 +1,22 @@
 package hexagon.utils
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 import java.util.Properties
+
+import hexagon.exceptions.HexagonException
 
 
 object PropKit {
 
 
   def load(path: String): Properties = {
-    val props = new Properties()
-    val in = new FileInputStream(path)
+    val file = new File(path)
+    if (!file.exists()) {
+      throw new HexagonException(s"Config file:$path dose't exists.")
+    }
+    val in = new FileInputStream(file)
     try {
+      val props = new Properties()
       props.load(in)
       props
     } finally {

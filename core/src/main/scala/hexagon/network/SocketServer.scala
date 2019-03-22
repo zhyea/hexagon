@@ -17,6 +17,10 @@ private[hexagon] class SocketServer(private val host: String,
 
     processor = new Processor(maxRequestSize)
     acceptor = new Acceptor(host, port, sendBufferSize, receiveBufferSize, processor)
+
+    Threads.newThread("Hexagon-processor", processor).start()
+    processor.awaitStartup()
+
     Threads.newThread("Hexagon-acceptor", acceptor).start()
     acceptor.awaitStartup()
 

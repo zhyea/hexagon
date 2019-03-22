@@ -18,11 +18,11 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
 
   val numIoThreads: Int = getInt(props, "num.io.threads", Int.MaxValue)
 
-  val socketSendBuffer: Int = getInt(props, "socket.send.buffer", 1024)
+  val socketSendBuffer: Int = getInt(props, "socket.send.buffer.bytes", 1024)
 
-  val socketReceiveBuffer: Int = getInt(props, "socket.receive.buffer", 1024)
+  val socketReceiveBuffer: Int = getInt(props, "socket.receive.buffer.bytes", 1024)
 
-  val maxSocketRequestSize: Int = getInt(props, "socket.request.max.byte", Int.MaxValue)
+  val maxSocketRequestSize: Int = getInt(props, "socket.request.max.bytes", Int.MaxValue)
 
 
   /**

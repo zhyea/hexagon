@@ -11,7 +11,7 @@ object Hexagon extends Logging {
   def main(args: Array[String]): Unit = {
 
     if (args.length != 1) {
-      println(s"Usage: java [options] ${classOf[HexagonServer].getSimpleName} config.properties")
+      println(s"Usage: java [options] ${classOf[HexagonServer].getSimpleName} server.properties")
       System.exit(1)
     }
 
