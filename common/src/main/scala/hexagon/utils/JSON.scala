@@ -7,7 +7,7 @@ import hexagon.exceptions.HexagonException
 
 object JSON {
 
-  val mapper = new ObjectMapper()
+  private val mapper = new ObjectMapper()
     .registerModule(DefaultScalaModule)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)

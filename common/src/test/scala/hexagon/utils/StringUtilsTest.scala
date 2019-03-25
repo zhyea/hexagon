@@ -5,7 +5,7 @@ import org.junit.{Assert, Test}
 @Test class StringUtilsTest {
 
 
-  @Test def isBlankTest(): Unit = {
+  @Test def isBlank(): Unit = {
 
     import StringUtils.isBlank
 

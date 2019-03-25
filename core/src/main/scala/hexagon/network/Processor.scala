@@ -24,6 +24,8 @@ private class Processor(val maxRequestSize: Int) extends AbstractServerThread {
           try {
             itr.remove()
 
+            checkKey(key)
+
             if (key.isReadable) {
               read(key)
             } else if (key.isWritable) {
@@ -42,7 +44,7 @@ private class Processor(val maxRequestSize: Int) extends AbstractServerThread {
       }
     }
     debug("Closing selector..")
-    swallow(selector.close)
+    swallow(selector.close())
     shutdownComplete()
   }
 
@@ -75,7 +77,7 @@ private class Processor(val maxRequestSize: Int) extends AbstractServerThread {
 
   private def process(key: SelectionKey, request: Receive): Option[Send] = {
 
-    val requestTypeId:Short = request.buffer.getShort
+    val requestTypeId: Short = request.buffer.getShort
 
     println(requestTypeId)
 
@@ -116,6 +118,19 @@ private class Processor(val maxRequestSize: Int) extends AbstractServerThread {
     while (!newConnection.isEmpty) {
       val sc = newConnection.poll()
       sc.register(selector, SelectionKey.OP_READ)
+    }
+  }
+
+
+  private def checkKey(key: SelectionKey): Unit = {
+    if (key.isReadable) {
+      println("-----------this key is readable")
+    } else if (key.isWritable) {
+      println("-----------this key is writable")
+    } else if (!key.isValid) {
+      println("-----------this key is not valid")
+    } else {
+      println("-----------this key is others")
     }
   }
 }

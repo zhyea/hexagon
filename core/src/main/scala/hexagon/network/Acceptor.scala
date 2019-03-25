@@ -29,10 +29,12 @@ private class Acceptor(val host: String,
         while (itr.hasNext) {
           key = itr.next()
           itr.remove()
-          if (key.isAcceptable)
+          if (key.isAcceptable) {
+            println(s"==================${key.readyOps()}")
             accept(key, processor)
-          else
-            throw new IllegalStateException("Not accept key in acceptor thread.")
+          } else
+            println(s"------------------${key.readyOps()}")
+          //throw new IllegalStateException("Not accept key in acceptor thread.")
         }
       }
     }
@@ -68,9 +70,8 @@ private class Acceptor(val host: String,
       ssc.socket().bind(socketAddress)
       info("Awaiting socket connection on {}:{}", socketAddress.getHostName, port)
     } catch {
-      case e: Exception => {
-        throw new HexagonConnectException(s"Socket Server failed to bind to ${socketAddress.getHostName}:${port} : ${e.getMessage}", e)
-      }
+      case e: Exception =>
+        throw new HexagonConnectException(s"Socket Server failed to bind to ${socketAddress.getHostName}:$port : ${e.getMessage}", e)
     }
     ssc
   }
