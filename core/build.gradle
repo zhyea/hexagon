@@ -2,6 +2,7 @@ project(':core') {
 
     dependencies {
         compile project(":common")
+        compile project(":api")
         compile group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
         compile group: 'com.google.guava', name: 'guava', version: '23.0'
     }
