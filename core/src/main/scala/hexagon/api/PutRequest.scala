@@ -2,7 +2,6 @@ package hexagon.api
 
 import java.nio.ByteBuffer
 
-import hexagon.network.Request
 import hexagon.protocol.ByteBufferEntitySet
 import hexagon.utils.IOUtils
 
@@ -21,7 +20,7 @@ object PutRequest {
 
 
 class PutRequest(val topic: String,
-                 val entitySet: ByteBufferEntitySet) extends Request(RequestKeys.Put) {
+                 val entitySet: ByteBufferEntitySet) extends RequestOrResponse(RequestKeys.Put) {
 
   /**
     * topicLength + topic + entitySetSize + entity
