@@ -1,4 +1,4 @@
-package hexagon.protocol
+package hexagon.exceptions
 
 class EntitySizeTooLargeException(message: String) extends RuntimeException(message) {
 

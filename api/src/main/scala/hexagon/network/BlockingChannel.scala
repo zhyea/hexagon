@@ -1,7 +1,7 @@
 package hexagon.network
 
 import java.net.InetSocketAddress
-import java.nio.channels.{Channels, GatheringByteChannel, ReadableByteChannel, SocketChannel}
+import java.nio.channels._
 
 import hexagon.tools.Logging
 
@@ -73,7 +73,25 @@ class BlockingChannel(val host: String,
   def isConnected: Boolean = connected
 
 
-  def send
+  def send(request:RequestOrResponse): Int = {
+    if(!connected)
+      throw new ClosedChannelException()
+
+    val send = new BoundedByteBufferSend(request)
+
+    send.writeCompletely(writeChannel)
+  }
+
+
+  def receive():Receive={
+    if(!connected)
+      throw new ClosedChannelException()
+
+    val response = new BoundedByteBufferReceive()
+    response.readCompletely(readChannel)
+
+    response
+  }
 
 
 }

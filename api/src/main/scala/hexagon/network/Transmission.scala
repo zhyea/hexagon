@@ -30,7 +30,7 @@ trait Receive extends Transmission {
 
   def readFrom(channel: ReadableByteChannel): Int
 
-  def readComplete(channel: ReadableByteChannel): Int = {
+  def readCompletely(channel: ReadableByteChannel): Int = {
     var totalRead = 0
     while (!isCompleted) {
       totalRead += readFrom(channel)
@@ -45,7 +45,7 @@ trait Send extends Transmission {
 
   def writeTo(channel: GatheringByteChannel): Int
 
-  def writeComplete(channel: GatheringByteChannel): Int = {
+  def writeCompletely(channel: GatheringByteChannel): Int = {
     var totalWrite = 0
     while (!isCompleted) {
       totalWrite += writeTo(channel)

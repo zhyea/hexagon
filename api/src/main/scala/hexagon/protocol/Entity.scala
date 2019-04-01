@@ -1,6 +1,7 @@
 package hexagon.protocol
 
 import java.nio.ByteBuffer
+
 import hexagon.utils.NumberUtils._
 
 object Entity {

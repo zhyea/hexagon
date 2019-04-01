@@ -3,7 +3,7 @@ package hexagon.protocol
 import java.nio.ByteBuffer
 import java.nio.channels.GatheringByteChannel
 
-import hexagon.exceptions.{InvalidEntityException, InvalidEntitySizeException}
+import hexagon.exceptions.{EntitySizeTooLargeException, InvalidEntityException, InvalidEntitySizeException}
 import hexagon.tools.ItrTemplate
 
 class ByteBufferEntitySet(private val buffer: ByteBuffer,
