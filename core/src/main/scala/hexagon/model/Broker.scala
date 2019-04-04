@@ -1,6 +1,6 @@
 package hexagon.model
 
-import hexagon.utils.NumberUtils._
+import hexagon.utils.NumUtils._
 
 case class Broker(id: Int, host: String, port: Int) {
 

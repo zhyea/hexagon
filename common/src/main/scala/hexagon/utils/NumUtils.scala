@@ -2,7 +2,7 @@ package hexagon.utils
 
 import java.util.zip.CRC32
 
-object NumberUtils {
+object NumUtils {
 
 
   /**

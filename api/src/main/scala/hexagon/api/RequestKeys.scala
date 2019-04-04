@@ -12,5 +12,4 @@ object RequestKeys {
 
   val MultiQuery: Short = 4
 
-
 }

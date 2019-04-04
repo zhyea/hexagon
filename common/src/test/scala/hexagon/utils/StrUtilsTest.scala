@@ -2,12 +2,12 @@ package hexagon.utils
 
 import org.junit.{Assert, Test}
 
-@Test class StringUtilsTest {
+@Test class StrUtilsTest {
 
 
   @Test def isBlank(): Unit = {
 
-    import StringUtils.isBlank
+    import StrUtils.isBlank
 
     Assert.assertTrue(isBlank(""))
     Assert.assertTrue(isBlank("  "))

@@ -2,7 +2,7 @@ package hexagon.protocol
 
 import java.nio.ByteBuffer
 
-import hexagon.utils.NumberUtils._
+import hexagon.utils.NumUtils._
 
 object Entity {
 
