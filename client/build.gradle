@@ -1,0 +1,6 @@
+project(':client') {
+
+    dependencies {
+        compile project(":api")
+    }
+}

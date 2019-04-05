@@ -1,2 +1,2 @@
-include 'common', 'core', 'api'
+include 'common', 'server', 'api', 'client'
 

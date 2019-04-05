@@ -2,6 +2,7 @@ project(':api') {
 
     dependencies {
         compile project(":common")
+        compile group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
     }
 
 }

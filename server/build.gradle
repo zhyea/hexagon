@@ -1,0 +1,7 @@
+project(':server') {
+
+    dependencies {
+        compile project(":api")
+        compile group: 'com.google.guava', name: 'guava', version: '23.0'
+    }
+}
