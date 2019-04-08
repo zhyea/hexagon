@@ -55,7 +55,7 @@ class Entity(val buffer: ByteBuffer) {
     buffer.rewind()
   }
 
-  def this(bytes: Array[Byte], compressionCodec: CompressionCodec) = this(crc32(bytes), bytes, compressionCodec)
+  def this(bytes: Array[Byte], compressionCodec: CompressionCodec = NoCompressionCodec) = this(crc32(bytes), bytes, compressionCodec)
 
   def size: Int = buffer.limit()
 

@@ -7,9 +7,9 @@ import hexagon.tools.Logging
 
 class BlockingChannel(val host: String,
                       val port: Int,
-                      val readBufferSize: Int,
-                      val writeBufferSize: Int,
-                      val readTimeoutMs: Int) extends Logging {
+                      val readBufferSize: Int = -1,
+                      val writeBufferSize: Int = -1,
+                      val readTimeoutMs: Int = 3000) extends Logging {
 
   private var connected = false
   private var channel: SocketChannel = null
@@ -73,8 +73,8 @@ class BlockingChannel(val host: String,
   def isConnected: Boolean = connected
 
 
-  def send(request:RequestOrResponse): Int = {
-    if(!connected)
+  def send(request: RequestOrResponse): Int = {
+    if (!connected)
       throw new ClosedChannelException()
 
     val send = new BoundedByteBufferSend(request)
@@ -83,8 +83,8 @@ class BlockingChannel(val host: String,
   }
 
 
-  def receive():Receive={
-    if(!connected)
+  def receive(): Receive = {
+    if (!connected)
       throw new ClosedChannelException()
 
     val response = new BoundedByteBufferReceive()
