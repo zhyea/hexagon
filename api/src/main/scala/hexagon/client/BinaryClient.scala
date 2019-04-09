@@ -90,10 +90,9 @@ class BinaryClient[T](val host: String,
 
 
   def put(record: Record[Entity]): Boolean = {
-    val req = PutRequest(record.topic, record.value)
-    val
-    blockingChannel.send(req)
-    ???
+    val request = PutRequest(record.topic, record.value)
+    val response = sendRequest(request)
+
   }
 
 }
