@@ -61,4 +61,13 @@ object JSON {
     }
   }
 
+
+  def parseFull(json: String): Option[Any] = {
+    try {
+      Some(toMap(json))
+    } catch {
+      case t: Throwable => None
+    }
+  }
+
 }
