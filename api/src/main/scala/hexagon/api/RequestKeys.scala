@@ -6,10 +6,8 @@ object RequestKeys {
 
   val Query: Short = 1
 
-  val QueryAndPut: Short = 2
+  val MultiPut: Short = 2
 
-  val MultiPut: Short = 3
-
-  val MultiQuery: Short = 4
+  val MultiQuery: Short = 3
 
 }
