@@ -5,8 +5,9 @@ import java.nio.channels.{SelectionKey, SocketChannel}
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
+import hexagon.handler.RequestHandlers
 
-private class Processor(val maxRequestSize: Int) extends AbstractServerThread {
+private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) extends AbstractServerThread {
 
   private val newConnection = new ConcurrentLinkedQueue[SocketChannel]()
 

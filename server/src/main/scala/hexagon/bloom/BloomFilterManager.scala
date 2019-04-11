@@ -1,12 +1,13 @@
 package hexagon.bloom
 
+import java.io.Closeable
 import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.{BloomFilter, Funnels}
 import hexagon.config.HexagonConfig
 
 
-private[hexagon] class BloomFilterManager(val config: HexagonConfig) {
+private[hexagon] class BloomFilterManager(val config: HexagonConfig) extends Closeable {
 
 
   val map: Map[String, Seq[BloomFilter[String]]] = Map()
@@ -18,4 +19,5 @@ private[hexagon] class BloomFilterManager(val config: HexagonConfig) {
       config.bloomfilterFalsePositiveProbability)
   }
 
+  override def close(): Unit = ???
 }
