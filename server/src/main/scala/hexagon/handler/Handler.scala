@@ -10,8 +10,6 @@ trait Handler extends Logging {
   protected val logger: Logger = LoggerFactory.getLogger("hexagon.request.logger")
 
 
-  def name: String
-
   def handle(receive: Receive): Option[Send]
 
 }

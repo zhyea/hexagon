@@ -1,13 +1,12 @@
 package hexagon.handler
 
 import hexagon.api.PutRequest
+import hexagon.bloom.BloomFilterManager
 import hexagon.network.{Receive, Send}
 import hexagon.tools.SysTime
 
-class PutRequestHandler extends Handler {
+class PutRequestHandler(val bloomFilterManager: BloomFilterManager) extends Handler {
 
-
-  override def name: String = "PutRequest"
 
   override def handle(receive: Receive): Option[Send] = {
     val start = SysTime.mills
@@ -24,10 +23,9 @@ class PutRequestHandler extends Handler {
   }
 
 
-  private def handle(request: PutRequest): Long = {
-
-
-    ???
+  private def handle(request: PutRequest): Boolean = {
+    val bloomFilter = bloomFilterManager.getBloomFilter();
+    bloomFilter.put(request.)
   }
 
 }

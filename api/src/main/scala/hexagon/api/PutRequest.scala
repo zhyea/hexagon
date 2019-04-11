@@ -1,47 +1,42 @@
 package hexagon.api
 
 import java.nio.ByteBuffer
+import java.util.Objects
 
 import hexagon.network.RequestOrResponse
-import hexagon.protocol.ByteBufferEntitySet
-import hexagon.utils.IOUtils
+import hexagon.tools.Bytes
+import hexagon.utils.IOUtils._
 
 
 object PutRequest {
 
   def readFrom(buffer: ByteBuffer): PutRequest = {
-    val topic = IOUtils.readShortString(buffer)
-    val entitySetSize = buffer.getInt
-    val entitySetBuffer = buffer.slice()
-    entitySetBuffer.limit(entitySetSize)
-    buffer.position(buffer.position() + entitySetSize)
-    new PutRequest(topic, new ByteBufferEntitySet(entitySetBuffer))
+    val topic = readShortString(buffer)
+    val msg = readShortString(buffer)
+    new PutRequest(topic, msg)
   }
-
 
 }
 
 
 class PutRequest(val topic: String,
-                 val entitySet: ByteBufferEntitySet) extends RequestOrResponse(RequestKeys.Put) {
+                 val msg: String) extends RequestOrResponse(RequestKeys.Put) {
 
   /**
-    * topicLength + topic + entitySetSize + entity
+    * topicLength + topic + msgLength + msg
     */
-  override def sizeInBytes: Int = 2 + topic.length + 4 + entitySet.sizeInBytes.toInt
+  override def sizeInBytes: Int = Bytes.Short + topic.length + Bytes.Short + msg.length
 
   override def writeTo(buffer: ByteBuffer): Unit = {
-    IOUtils.writeShortString(buffer, topic)
-    buffer.putInt(entitySet.sizeInBytes.toInt)
-    buffer.put(entitySet.serialized)
-    entitySet.serialized.rewind()
+    writeShortString(buffer, topic)
+    writeShortString(buffer, msg)
   }
 
   override def toString: String = {
     val builder = new StringBuilder()
     builder.append("PutRequest(")
     builder.append(topic + ",")
-    builder.append(entitySet.sizeInBytes)
+    builder.append(msg)
     builder.append(")")
     builder.toString
   }
@@ -49,12 +44,12 @@ class PutRequest(val topic: String,
   override def equals(other: Any): Boolean = {
     other match {
       case that: PutRequest =>
-        (that canEqual this) && topic == that.topic && entitySet.equals(that.entitySet)
+        (that canEqual this) && topic == that.topic && msg == that.msg
       case _ => false
     }
   }
 
   def canEqual(other: Any): Boolean = other.isInstanceOf[PutRequest]
 
-  override def hashCode(): Int = 31 + topic.hashCode + entitySet.hashCode()
+  override def hashCode(): Int = Objects.hash(topic, msg)
 }

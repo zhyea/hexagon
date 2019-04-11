@@ -14,12 +14,12 @@ class Client(val host: String, val port: Int) {
     ???
   }
 
-  def put(record: Record[String]): Boolean = {
+  def put(topic: String, msg: String): Boolean = {
     ???
   }
 
 
-  def query(record: Record[String]): Boolean = {
+  def query(topic: String, msg: String): Boolean = {
     ???
   }
 

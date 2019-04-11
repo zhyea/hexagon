@@ -2,9 +2,8 @@ package hexagon.client
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import hexagon.api.PutRequest
+import hexagon.api.{PutRequest, PutResponse}
 import hexagon.network.{BlockingChannel, Receive, RequestOrResponse}
-import hexagon.protocol.Entity
 import hexagon.serializer.Encoder
 import hexagon.tools.Logging
 import hexagon.utils.NetUtils._
@@ -89,10 +88,9 @@ class BinaryClient[T](val host: String,
   }
 
 
-  def put(record: Record[Entity]): Boolean = {
-    val request = PutRequest(record.topic, record.value)
-    val response = sendRequest(request)
-
+  def put(putRequest: PutRequest): PutResponse = {
+    val receive = sendRequest(putRequest)
+    PutResponse.readFrom(receive.buffer)
   }
 
 }

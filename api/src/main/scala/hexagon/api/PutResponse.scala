@@ -17,8 +17,7 @@ object PutResponse {
 }
 
 
-case class PutResponse(val topic: String,
-                       val result: Boolean) extends RequestOrResponse(RequestKeys.Put) {
+case class PutResponse(topic: String, result: Boolean) extends RequestOrResponse(RequestKeys.Put) {
 
   override def sizeInBytes: Int = shortStringLength(topic)
 
