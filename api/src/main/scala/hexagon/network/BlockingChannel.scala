@@ -3,6 +3,7 @@ package hexagon.network
 import java.net.InetSocketAddress
 import java.nio.channels._
 
+import hexagon.api.RequestOrResponse
 import hexagon.tools.Logging
 
 class BlockingChannel(val host: String,

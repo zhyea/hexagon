@@ -3,6 +3,8 @@ package hexagon.network
 import java.nio.ByteBuffer
 import java.nio.channels.GatheringByteChannel
 
+import hexagon.api.RequestOrResponse
+
 
 private[hexagon] class BoundedByteBufferSend(val buffer: ByteBuffer) extends Send {
 

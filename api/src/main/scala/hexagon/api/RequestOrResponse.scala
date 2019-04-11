@@ -1,4 +1,4 @@
-package hexagon.network
+package hexagon.api
 
 import java.nio.ByteBuffer
 

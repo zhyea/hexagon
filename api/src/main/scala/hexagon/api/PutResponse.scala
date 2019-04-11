@@ -2,7 +2,6 @@ package hexagon.api
 
 import java.nio.ByteBuffer
 
-import hexagon.network.RequestOrResponse
 import hexagon.utils.IOUtils._
 
 

@@ -2,8 +2,8 @@ package hexagon.client
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import hexagon.api.{PutRequest, PutResponse}
-import hexagon.network.{BlockingChannel, Receive, RequestOrResponse}
+import hexagon.api.{PutRequest, PutResponse, RequestOrResponse}
+import hexagon.network.{BlockingChannel, Receive}
 import hexagon.serializer.Encoder
 import hexagon.tools.Logging
 import hexagon.utils.NetUtils._
