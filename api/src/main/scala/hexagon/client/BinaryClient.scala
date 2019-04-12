@@ -4,16 +4,14 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.api.{PutRequest, PutResponse, RequestOrResponse}
 import hexagon.network.{BlockingChannel, Receive}
-import hexagon.serializer.Encoder
 import hexagon.tools.Logging
 import hexagon.utils.NetUtils._
 
-class BinaryClient[T](val host: String,
+class BinaryClient(val host: String,
                       val port: Int,
                       val readBufferSize: Int,
                       val writeBufferSize: Int,
-                      val socketTimeout: Int,
-                      val encoder: Encoder[T]) extends Logging {
+                      val socketTimeout: Int) extends Logging {
 
   private val blockingChannel: BlockingChannel =
     new BlockingChannel(host, port, readBufferSize, writeBufferSize, socketTimeout)

@@ -1,8 +1,8 @@
 package hexagon.handler
 
-import hexagon.api.PutRequest
+import hexagon.api.{PutRequest, PutResponse, RequestOrResponse}
 import hexagon.bloom.BloomFilterManager
-import hexagon.network.{Receive, Send}
+import hexagon.network.{BoundedByteBufferSend, Receive, Send}
 import hexagon.tools.SysTime
 
 class PutRequestHandler(val bloomFilterManager: BloomFilterManager) extends Handler {
@@ -15,17 +15,16 @@ class PutRequestHandler(val bloomFilterManager: BloomFilterManager) extends Hand
     if (logger.isTraceEnabled())
       logger.trace(s"Put request $request")
 
-
-
+    val response = handle(request)
     debug(s"Handle PutRequest used time: ${SysTime.elapsed(start)}")
 
-    ???
+    Some(new BoundedByteBufferSend(response))
   }
 
 
-  private def handle(request: PutRequest): Boolean = {
-    val bloomFilter = bloomFilterManager.getBloomFilter();
-    bloomFilter.put(request.)
+  private def handle(request: PutRequest): RequestOrResponse = {
+    val r = bloomFilterManager.getBloomFilter().put(request.msg)
+    PutResponse(request.topic, r)
   }
 
 }
