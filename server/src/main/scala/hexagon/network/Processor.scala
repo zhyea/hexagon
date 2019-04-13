@@ -34,7 +34,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
             } else if (!key.isValid) {
               close(key)
             } else {
-              throw new IllegalStateException("Unrecognized state for processor thread.")
+              //throw new IllegalStateException("Unrecognized state for processor thread.")
             }
           } catch {
             case e: EOFException => error(s"Closing socket for $remoteHost.", e); close(key)
@@ -51,19 +51,19 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
 
   def read(key: SelectionKey): Unit = {
     val sc = key.channel().asInstanceOf[SocketChannel]
-    var request = key.attachment().asInstanceOf[Receive]
+    var receive = key.attachment().asInstanceOf[Receive]
     if (null == key.attachment) {
-      request = new BoundedByteBufferReceive(maxRequestSize)
-      key.attach(request)
+      receive = new BoundedByteBufferReceive(maxRequestSize)
+      key.attach(receive)
     }
 
-    val read = request.readFrom(sc)
+    val read = receive.readFrom(sc)
     trace(s"$read bytes read from ${sc.getRemoteAddress}")
 
     if (read < 0) {
       close(key)
-    } else if (request.isCompleted) {
-      val response = process(key, request)
+    } else if (receive.isCompleted) {
+      val response = handle(key, receive)
       key.attach(null)
       if (response.isDefined) {
         key.attach(response.getOrElse(None))
@@ -76,13 +76,8 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
   }
 
 
-  private def process(key: SelectionKey, request: Receive): Option[Send] = {
-
-    val requestTypeId: Short = request.buffer.getShort
-
-    println(requestTypeId)
-
-    None
+  private def handle(key: SelectionKey, receive: Receive): Option[Send] = {
+    handlers.handle(receive)
   }
 
 

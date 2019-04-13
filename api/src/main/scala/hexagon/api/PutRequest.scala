@@ -18,8 +18,8 @@ object PutRequest {
 }
 
 
-class PutRequest(val topic: String,
-                 val msg: String) extends RequestOrResponse(RequestKeys.Put) {
+case class PutRequest(val topic: String,
+                      val msg: String) extends RequestOrResponse(RequestKeys.Put) {
 
   /**
     * topicLength + topic + msgLength + msg

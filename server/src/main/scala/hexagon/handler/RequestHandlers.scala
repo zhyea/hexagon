@@ -12,11 +12,16 @@ private[hexagon] class RequestHandlers(val bloomFilterManager: BloomFilterManage
   override def handle(receive: Receive): Option[Send] = {
     val requestId = receive.buffer.getShort
 
-    requestId match {
-      case RequestKeys.Put => putRequestHandler.handle(receive)
-      case _ => throw new IllegalStateException(s"No mapping handler for id:$requestId")
-    }
+    try {
 
+      requestId match {
+        case RequestKeys.Put => putRequestHandler.handle(receive)
+        case _ => throw new IllegalStateException(s"No mapping handler for id:$requestId")
+      }
+
+    } catch {
+      case e: Throwable => error(s"Handling request with id:$requestId failed.", e); None
+    }
   }
 
 

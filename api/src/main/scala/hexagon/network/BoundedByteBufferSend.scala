@@ -20,7 +20,7 @@ private[hexagon] class BoundedByteBufferSend(val buffer: ByteBuffer) extends Sen
   def this(size: Int) = this(ByteBuffer.allocate(size))
 
   def this(request: RequestOrResponse) = {
-    this(request.sizeInBytes + java.lang.Short.BYTES)
+    this(java.lang.Short.BYTES + request.sizeInBytes) // requestId + buffer
     buffer.putShort(request.id)
     request.writeTo(buffer)
     buffer.rewind()

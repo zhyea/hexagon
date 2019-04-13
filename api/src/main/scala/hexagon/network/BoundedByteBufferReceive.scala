@@ -11,7 +11,7 @@ private[hexagon] class BoundedByteBufferReceive(maxSize: Int) extends Receive {
   private var contentBuffer: ByteBuffer = _
 
   def this() = this(Int.MaxValue)
-  
+
   override def buffer: ByteBuffer = {
     expectComplete()
     contentBuffer
@@ -33,7 +33,7 @@ private[hexagon] class BoundedByteBufferReceive(maxSize: Int) extends Receive {
     }
 
     if (null != contentBuffer) {
-      channel.read(contentBuffer)
+     read += channel.read(contentBuffer)
       if (!contentBuffer.hasRemaining) {
         contentBuffer.rewind()
         complete.set(true)

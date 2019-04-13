@@ -7,11 +7,11 @@ import hexagon.network.{BlockingChannel, Receive}
 import hexagon.tools.Logging
 import hexagon.utils.NetUtils._
 
-class BinaryClient(val host: String,
-                      val port: Int,
-                      val readBufferSize: Int,
-                      val writeBufferSize: Int,
-                      val socketTimeout: Int) extends Logging {
+private[hexagon] class BinaryClient(val host: String,
+                                    val port: Int,
+                                    val readBufferSize: Int,
+                                    val writeBufferSize: Int,
+                                    val socketTimeout: Int) extends Logging {
 
   private val blockingChannel: BlockingChannel =
     new BlockingChannel(host, port, readBufferSize, writeBufferSize, socketTimeout)
