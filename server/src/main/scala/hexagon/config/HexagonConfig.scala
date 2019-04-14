@@ -28,13 +28,15 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
   /**
     * BloomFilter Configs
     */
-  val bloomFilterValidHours: Int = getInt(props, "bloomfilter.valid.hours", 24);
+  val bloomFilterValidHours: Int = getInt(props, "bf.valid.hours", 24);
 
-  val bloomfilterExpectInsertions: Long = getLong(props, "bloomfilter.expect.insertions", Int.MaxValue)
+  val bloomFilterExpectInsertions: Long =
+    if (getLong(props, "bf.expect.insertions") <= 0) Int.MaxValue else getLong(props, "bf.expect.insertions")
 
-  val bloomfilterFalsePositiveProbability: Double = getDouble(props, "bloomfilter.false.positive.probability", 0.0000000001)
 
-  val bloomfilterBackupRetentionHours: Int = getInt(props, "bloomfilter.backup.retention.hours", 24 * 30)
+  val bloomFilterFalsePositiveProbability: Double = getDouble(props, "bf.false.positive.probability", 0.0000000001)
+
+  val bloomFilterBackupRetentionHours: Int = getInt(props, "bf.backup.retention.hours", 24 * 30)
 
 
   /**
