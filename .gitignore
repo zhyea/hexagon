@@ -7,4 +7,6 @@
 .idea
 *.iml
 */out/
-
+*/logs/
+*/build/
+logs/
