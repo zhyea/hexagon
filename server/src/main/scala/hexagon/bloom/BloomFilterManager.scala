@@ -10,14 +10,18 @@ import hexagon.config.HexagonConfig
 private[hexagon] class BloomFilterManager(val config: HexagonConfig) extends Closeable {
 
 
-  val map: Map[String, Seq[BloomFilter[String]]] = Map()
+  val map: Map[String, BloomFilter[String]] = Map()
 
 
-  def getBloomFilter(): BloomFilter[String] = {
-    BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8),
+  def getBloomFilter(topic: String): BloomFilter[String] = {
+
+    def create: BloomFilter[String] = BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8),
       config.bloomFilterExpectInsertions,
       config.bloomFilterFalsePositiveProbability)
+
+    map.getOrElse(topic, create)
   }
+
 
   override def close(): Unit = ???
 }

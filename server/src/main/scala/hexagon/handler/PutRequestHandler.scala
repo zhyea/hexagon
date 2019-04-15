@@ -23,7 +23,7 @@ class PutRequestHandler(val bloomFilterManager: BloomFilterManager) extends Hand
 
 
   private def handle(request: PutRequest): RequestOrResponse = {
-    val bf = bloomFilterManager.getBloomFilter()
+    val bf = bloomFilterManager.getBloomFilter(request.topic)
     val r = bf.put(request.msg)
     PutResponse(request.topic, r)
   }

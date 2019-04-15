@@ -2,6 +2,7 @@ package hexagon.api
 
 import java.nio.ByteBuffer
 
+import hexagon.tools.Bytes
 import hexagon.utils.IOUtils._
 
 
@@ -18,7 +19,7 @@ object PutResponse {
 
 case class PutResponse(topic: String, result: Boolean) extends RequestOrResponse(RequestKeys.Put) {
 
-  override def sizeInBytes: Int = shortStringLength(topic)
+  override def sizeInBytes: Int = shortStringLength(topic) + Bytes.Byte
 
   override def writeTo(buffer: ByteBuffer): Unit = {
     writeShortString(buffer, topic)
