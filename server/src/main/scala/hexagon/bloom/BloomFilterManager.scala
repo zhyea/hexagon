@@ -5,21 +5,26 @@ import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.{BloomFilter, Funnels}
 import hexagon.config.HexagonConfig
+import hexagon.tools.Pool
 
 
 private[hexagon] class BloomFilterManager(val config: HexagonConfig) extends Closeable {
 
 
-  val map: Map[String, BloomFilter[String]] = Map()
+  val map: Pool[String, BloomFilter[String]] = new Pool()
 
 
   def getBloomFilter(topic: String): BloomFilter[String] = {
 
-    def create: BloomFilter[String] = BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8),
-      config.bloomFilterExpectInsertions,
-      config.bloomFilterFalsePositiveProbability)
+    def create: BloomFilter[String] = {
+      println("zzzzz------------------------")
 
-    map.getOrElse(topic, create)
+      BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8),
+        config.bloomFilterExpectInsertions,
+        config.bloomFilterFalsePositiveProbability)
+    }
+
+    map.putIfNotExists(topic, create)
   }
 
 
