@@ -19,9 +19,9 @@ class HexagonClientTest {
         println(r)
       })
     } finally {
+      println("-------------")
       client.close()
     }
-
 
   }
 
