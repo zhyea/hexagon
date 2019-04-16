@@ -1,5 +1,6 @@
 package hexagon.utils
 
+import java.nio.channels.{SelectionKey, SocketChannel}
 import java.util.regex.Pattern
 
 object NetUtils {
@@ -7,6 +8,11 @@ object NetUtils {
 
   private val HOST_PORT_PATTERN = Pattern.compile("\\[?(.+?)\\]?:(\\d+)")
 
+
+  def channelOf(key: SelectionKey): SocketChannel = {
+    key.channel().asInstanceOf[SocketChannel]
+  }
+  
 
   def extractHost(address: String): String = {
     val matcher = HOST_PORT_PATTERN.matcher(address)

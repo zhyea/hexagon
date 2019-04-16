@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
 import hexagon.handler.RequestHandlers
+import hexagon.utils.NetUtils._
 
 private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) extends AbstractServerThread {
 
@@ -21,7 +22,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
         val itr = keys.iterator()
         while (itr.hasNext && isRunning) {
           val key = itr.next()
-          val remoteHost = key.channel().asInstanceOf[SocketChannel].getRemoteAddress
+          val remoteHost = channelOf(key).getRemoteAddress
           try {
             itr.remove()
 
@@ -50,7 +51,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
   }
 
   def read(key: SelectionKey): Unit = {
-    val sc = key.channel().asInstanceOf[SocketChannel]
+    val sc = channelOf(key)
     var receive = key.attachment().asInstanceOf[Receive]
     if (null == key.attachment) {
       receive = new BoundedByteBufferReceive(maxRequestSize)
@@ -82,7 +83,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
 
 
   def write(key: SelectionKey): Unit = {
-    val sc = key.channel().asInstanceOf[SocketChannel]
+    val sc = channelOf(key)
     val response = key.attachment().asInstanceOf[Send]
     val written = response.writeTo(sc)
     trace(s"$written bytes written to ${sc.getRemoteAddress}")
@@ -96,7 +97,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
 
 
   def close(key: SelectionKey): Unit = {
-    val channel = key.channel().asInstanceOf[SocketChannel]
+    val channel = channelOf(key)
     swallow(channel.socket().close())
     swallow(channel.close())
     key.attach(null)
