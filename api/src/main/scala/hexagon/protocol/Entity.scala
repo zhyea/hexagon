@@ -2,6 +2,7 @@ package hexagon.protocol
 
 import java.nio.ByteBuffer
 
+import hexagon.tools.BYTES
 import hexagon.utils.NumUtils._
 
 object Entity {
@@ -81,7 +82,7 @@ class Entity(val buffer: ByteBuffer) {
   def isValid: Boolean =
     checksum == crc32(buffer.array(), buffer.position() + buffer.arrayOffset() + payloadOffset(), payloadSize())
 
-  def serializedSize: Int = Integer.BYTES + buffer.limit()
+  def serializedSize: Int = BYTES.Int + buffer.limit()
 
   def serializeTo(serBuffer: ByteBuffer): ByteBuffer = {
     serBuffer.putInt(buffer.limit())

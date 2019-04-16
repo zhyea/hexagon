@@ -3,7 +3,7 @@ package hexagon.api
 import java.nio.ByteBuffer
 import java.util.Objects
 
-import hexagon.tools.Bytes
+import hexagon.tools.BYTES
 import hexagon.utils.IOUtils._
 
 
@@ -18,27 +18,20 @@ object PutRequest {
 }
 
 
-case class PutRequest(val topic: String,
-                      val msg: String) extends RequestOrResponse(RequestKeys.Put) {
+case class PutRequest(topic: String,
+                      msg: String) extends RequestOrResponse(RequestKeys.Put) {
 
   /**
     * topicLength + topic + msgLength + msg
     */
-  override def sizeInBytes: Int = Bytes.Short + topic.length + Bytes.Short + msg.length
+  override def sizeInBytes: Int = BYTES.Short + topic.length + BYTES.Short + msg.length
 
   override def writeTo(buffer: ByteBuffer): Unit = {
     writeShortString(buffer, topic)
     writeShortString(buffer, msg)
   }
 
-  override def toString: String = {
-    val builder = new StringBuilder()
-    builder.append("PutRequest(")
-    builder.append(topic + ",")
-    builder.append(msg)
-    builder.append(")")
-    builder.toString
-  }
+  override def toString: String = s"PutRequest(topic:$topic,msg:$msg)"
 
   override def equals(other: Any): Boolean = {
     other match {

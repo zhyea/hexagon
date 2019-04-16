@@ -3,6 +3,7 @@ package hexagon.cluster
 import java.nio.ByteBuffer
 
 import hexagon.exceptions.{BrokerNotAvailableException, HexagonException}
+import hexagon.tools.BYTES
 import hexagon.utils.IOUtils._
 import hexagon.utils.JSON
 import hexagon.utils.NetUtils._
@@ -50,7 +51,7 @@ case class Broker(id: Int, host: String, port: Int) {
   }
 
   def sizeInBytes: Int =
-    shortStringLength(host) /* host name */ + Integer.BYTES /* port */ + Integer.BYTES /* broker id*/
+    shortStringLength(host) /* host name */ + BYTES.Int /* port */ + BYTES.Int /* broker id*/
 
 
   override def toString: String = s"id:$id,host:$host,post:$port"

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.GatheringByteChannel
 
 import hexagon.exceptions.{EntitySizeTooLargeException, InvalidEntityException, InvalidEntitySizeException}
-import hexagon.tools.ItrTemplate
+import hexagon.tools.{BYTES, ItrTemplate}
 
 class ByteBufferEntitySet(private val buffer: ByteBuffer,
                           private val initOffset: Long = 0L) extends EntitySet {
@@ -81,7 +81,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
     var lastEntitySize: Long = 0L
 
     def makeNextOuter(): EntityAndOffset = {
-      if (outerBuffer.remaining() < Integer.BYTES) {
+      if (outerBuffer.remaining() < BYTES.Int) {
         return done()
       }
 

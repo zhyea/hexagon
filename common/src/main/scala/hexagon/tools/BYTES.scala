@@ -1,6 +1,6 @@
 package hexagon.tools
 
-object Bytes {
+object BYTES {
 
   val Byte: Int = java.lang.Byte.BYTES
 

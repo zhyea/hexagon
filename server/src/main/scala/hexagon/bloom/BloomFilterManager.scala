@@ -11,20 +11,19 @@ import hexagon.tools.Pool
 private[hexagon] class BloomFilterManager(val config: HexagonConfig) extends Closeable {
 
 
-  val map: Pool[String, BloomFilter[String]] = new Pool()
+  val pool: Pool[String, BloomFilter[String]] = new Pool()
 
 
   def getBloomFilter(topic: String): BloomFilter[String] = {
 
     def create: BloomFilter[String] = {
-      println("zzzzz------------------------")
-
       BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8),
         config.bloomFilterExpectInsertions,
         config.bloomFilterFalsePositiveProbability)
     }
-
-    map.putIfNotExists(topic, create)
+    
+    pool.putIfNotExists(topic, create)
+    pool.get(topic)
   }
 
 

@@ -20,7 +20,7 @@ private[hexagon] class RequestHandlers(val bloomFilterManager: BloomFilterManage
       }
 
     } catch {
-      case e: Throwable => error(s"Handling request with id:$requestId failed.", e); None
+      case e: Throwable => error(s"Handling request with id:$requestId failed.",  e); None
     }
   }
 
