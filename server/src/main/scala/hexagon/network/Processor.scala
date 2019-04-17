@@ -35,7 +35,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
             } else if (!key.isValid) {
               close(key)
             } else {
-              //throw new IllegalStateException("Unrecognized state for processor thread.")
+              throw new IllegalStateException("Unrecognized state for processor thread.")
             }
           } catch {
             case e: EOFException => error(s"Closing socket for $remoteHost.", e); close(key)
@@ -97,11 +97,7 @@ private class Processor(val handlers: RequestHandlers, val maxRequestSize: Int) 
 
 
   def close(key: SelectionKey): Unit = {
-    val channel = channelOf(key)
-    swallow(channel.socket().close())
-    swallow(channel.close())
-    key.attach(null)
-    key.cancel()
+    swallow(disconnect(key))
   }
 
 

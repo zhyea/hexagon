@@ -9,10 +9,19 @@ object NetUtils {
   private val HOST_PORT_PATTERN = Pattern.compile("\\[?(.+?)\\]?:(\\d+)")
 
 
+  def disconnect(key: SelectionKey): Unit = {
+    val channel = channelOf(key)
+    channel.socket().close()
+    channel.close()
+    key.attach(null)
+    key.cancel()
+  }
+
+
   def channelOf(key: SelectionKey): SocketChannel = {
     key.channel().asInstanceOf[SocketChannel]
   }
-  
+
 
   def extractHost(address: String): String = {
     val matcher = HOST_PORT_PATTERN.matcher(address)

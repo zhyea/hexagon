@@ -5,6 +5,7 @@ import java.nio.channels.{SelectionKey, ServerSocketChannel}
 
 import hexagon.exceptions.HexagonConnectException
 import hexagon.utils.StrUtils
+import hexagon.utils.NetUtils._
 
 
 private class Acceptor(val host: String,
@@ -29,13 +30,16 @@ private class Acceptor(val host: String,
         while (itr.hasNext) {
           key = itr.next()
           itr.remove()
-          if (key.isAcceptable) {
-            println(s"==================${key.readyOps()}")
+
+          if (!key.isValid) {
+            swallow(disconnect(key))
+          } else if (key.isAcceptable) {
             accept(key, processor)
           } else {
-            println(s"------------------${key.readyOps()}")
+            println(s"------------------1${key.readyOps()}")
             //throw new IllegalStateException("Not accept key in acceptor thread.")
           }
+
         }
       }
     }
