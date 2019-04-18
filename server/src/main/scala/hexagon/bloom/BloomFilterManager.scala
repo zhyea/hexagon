@@ -18,7 +18,7 @@ private[hexagon] class BloomFilterManager(val config: HexagonConfig) extends Clo
 
     def create: BloomFilter[String] = {
       BloomFilter.create(Funnels.stringFunnel(StandardCharsets.UTF_8),
-        config.bloomFilterExpectInsertions,
+        config.bfExpectInsertions,
         config.bloomFilterFalsePositiveProbability)
     }
     

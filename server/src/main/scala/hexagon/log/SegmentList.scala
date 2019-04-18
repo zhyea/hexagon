@@ -7,6 +7,10 @@ private[log] class SegmentList(seq: Seq[LogSegment]) {
 
   val contents: AtomicReference[Array[LogSegment]] = new AtomicReference[Array[LogSegment]](seq.toArray)
 
+
+  /**
+    * 追加新的LogSegment
+    */
   def append(ts: LogSegment*): Unit = {
     while (true) {
       val curr = contents.get()
@@ -20,7 +24,10 @@ private[log] class SegmentList(seq: Seq[LogSegment]) {
   }
 
 
-  def trunc(count: Int): Seq[LogSegment] = {
+  /**
+    * 截去前 count 个LogSegment
+    */
+  def truncate(count: Int): Seq[LogSegment] = {
     if (count < 0)
       throw new IllegalArgumentException("Starting index must be positive.")
 

@@ -39,12 +39,12 @@ object Entity {
   * 3. 4 byte CRC32 of payload
   * 4. N-6 byte payload
   */
-class Entity(val buffer: ByteBuffer) {
+private[hexagon] class Entity(val buffer: ByteBuffer) {
 
   import Entity._
 
-  private def this(checksum: Long, bytes: Array[Byte], compressionCodec: CompressionCodec) = {
-    this(ByteBuffer.allocate(Entity.headerSize() + bytes.length))
+  def this(checksum: Long, bytes: Array[Byte], compressionCodec: CompressionCodec) = {
+    this(ByteBuffer.allocate(headerSize() + bytes.length))
     buffer.put(MagicVersion)
     var codec: Byte = NoCompressionCodec.codec.toByte
     if (compressionCodec.codec > 0) {

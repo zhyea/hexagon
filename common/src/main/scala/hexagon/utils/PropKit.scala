@@ -48,6 +48,12 @@ object PropKit {
   }
 
 
+  def getPositiveLong(props: Properties, key: String, defaultValue: Long = 0): Long = {
+    val value = getLong(props, key)
+    if (value > 0) value else defaultValue
+  }
+
+
   def getDouble(props: Properties, key: String, defaultValue: Double = 0): Double = {
     if (props.containsKey(key))
       props.getProperty(key).toDouble
