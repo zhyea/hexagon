@@ -35,12 +35,9 @@ private class Acceptor(val host: String,
             swallow(disconnect(key))
           } else if (key.isAcceptable) {
             accept(key, processor)
-          } else {
-            println(s"------------------1${key.readyOps()}")
-            //throw new IllegalStateException("Not accept key in acceptor thread.")
           }
-
         }
+
       }
     }
 

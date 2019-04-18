@@ -4,7 +4,6 @@ import java.io.{ByteArrayOutputStream, IOException, InputStream}
 import java.nio.ByteBuffer
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
-import com.fasterxml.jackson.databind.util.ByteBufferBackedInputStream
 import hexagon.exceptions.UnknownCodecException
 import hexagon.tools.Logging
 

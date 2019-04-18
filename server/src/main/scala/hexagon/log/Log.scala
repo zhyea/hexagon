@@ -25,8 +25,13 @@ private[log] object Log {
 }
 
 
-private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val maxMessageSize: Int,
-                       val flushInterval: Int, val rollIntervalMs: Long, val needRecovery: Boolean) extends Logging {
+private[log] class Log(val dir: File,
+                       val time: Long,
+                       val maxSize: Long,
+                       val maxMessageSize: Int,
+                       val flushInterval: Int,
+                       val rollIntervalMs: Long,
+                       val needRecovery: Boolean) extends Logging {
 
 
   private val lock = new Object
