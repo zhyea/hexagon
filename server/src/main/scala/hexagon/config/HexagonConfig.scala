@@ -50,6 +50,7 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
   /**
     * Zookeeper Configs
     */
+  val enableZooKeeper:Boolean = getBool(props, "enable.zookeeper")
 
 
 }

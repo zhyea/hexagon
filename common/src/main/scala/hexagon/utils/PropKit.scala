@@ -62,4 +62,12 @@ object PropKit {
   }
 
 
+  def getBool(props: Properties, key: String, defaultValue: Boolean = false): Boolean = {
+    if (props.containsKey(key))
+      props.getProperty(key).toBoolean
+    else
+      defaultValue
+  }
+
+
 }

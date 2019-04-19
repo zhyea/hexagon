@@ -3,7 +3,7 @@ package hexagon.log
 import java.io.File
 
 import hexagon.config.HexagonConfig
-import hexagon.tools.Logging
+import hexagon.tools.{HexagonScheduler, Logging, Pool, SysTime}
 
 
 private[hexagon] object LogManager extends Logging {
@@ -29,11 +29,25 @@ private[hexagon] object LogManager extends Logging {
 
 
 private[hexagon] class LogManager(val config: HexagonConfig,
+                                  private val scheduler: HexagonScheduler,
                                   private val time: Long,
-                                  needRecovery: Boolean) extends Logging {
+                                  needRecovery: Boolean,
+                                  val logCleanupIntervalMs: Long) extends Logging {
 
   private val logDir = LogManager.getOrCreateLogDir(config.logDir)
   private val lock = new Object
+
+  /**
+    * logs pool
+    */
+  private val logs = new Pool[String, Log]()
+
+
+  def startup(): Unit = {
+    if ()
+
+
+  }
 
 
   def getOrCreateLog(): Log = {
@@ -51,6 +65,27 @@ private[hexagon] class LogManager(val config: HexagonConfig,
       new Log(d, time, config.logFileSize, needRecovery)
     }
 
+  }
+
+
+  def cleanupLogs(): Unit = {
+    debug("Beginning logs cleanup ..")
+    var total = 0
+    val startMs = SysTime.mills
+    val itr = getLogIterator()
+    while(itr.hasNext){
+      val log = itr.next()
+      debug(s"Garbage collecting '${log.}'")
+    }
+    while(itr.hasNext){
+      itr.next().close()
+    }
+
+  }
+
+
+  private def getLogIterator(): Iterator[Log] = {
+    logs.values().iterator
   }
 
 }
