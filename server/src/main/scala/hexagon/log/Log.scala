@@ -14,6 +14,9 @@ private[log] object Log {
   val FileSuffix: String = ".log"
 
 
+  /**
+    * 根据offset命名日志文件，名称为20个数字，无分隔符
+    */
   def nameFromOffset(offset: Long): String = {
     val nf = NumberFormat.getInstance()
     nf.setMinimumIntegerDigits(20)

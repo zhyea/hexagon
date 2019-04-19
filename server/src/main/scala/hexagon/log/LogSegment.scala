@@ -5,8 +5,11 @@ import java.io.File
 import hexagon.protocol.{ByteBufferEntitySet, FileEntitySet}
 
 
-private[log] class LogSegment(val file: File, val time: Long, val entitySet: FileEntitySet, val start: Long) {
 
+private[log] class LogSegment(val file: File, val time: Long, val entitySet: FileEntitySet, val start: Long) {
+  /**
+    *
+    */
   var firstAppendTime: Option[Long] = None
 
   def size: Long = entitySet.highWaterMark()
