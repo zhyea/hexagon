@@ -42,7 +42,9 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
   /**
     * BloomFilter Configs
     */
-  val logDir: String = getString(props, "log.dir")
+  val logDir: String = s"${getString(props, "log.dir")}/$brokerId"
+
+  val logFileSize: Long = getLong(props, "log.file.size", 1 * 1024 * 1024 * 1024)
 
 
   /**

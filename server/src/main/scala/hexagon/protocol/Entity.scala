@@ -44,7 +44,7 @@ private[hexagon] class Entity(val buffer: ByteBuffer) {
   import Entity._
 
   def this(checksum: Long, bytes: Array[Byte], compressionCodec: CompressionCodec) = {
-    this(ByteBuffer.allocate(headerSize() + bytes.length))
+    this(ByteBuffer.allocate(Entity.headerSize() + bytes.length))
     buffer.put(MagicVersion)
     var codec: Byte = NoCompressionCodec.codec.toByte
     if (compressionCodec.codec > 0) {

@@ -3,6 +3,10 @@ package hexagon.log
 import java.util.concurrent.atomic.AtomicReference
 import scala.math._
 
+
+/**
+  * LogSegment集合
+  */
 private[log] class SegmentList(seq: Seq[LogSegment]) {
 
   val contents: AtomicReference[Array[LogSegment]] = new AtomicReference[Array[LogSegment]](seq.toArray)

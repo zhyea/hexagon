@@ -2,8 +2,8 @@ package hexagon.log
 
 import java.io.{File, IOException}
 import java.text.NumberFormat
-import java.util.{ArrayList, Collections, Comparator}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong}
+import java.util.{ArrayList, Collections}
 
 import hexagon.protocol.FileEntitySet
 import hexagon.tools.{Logging, SysTime}
@@ -28,12 +28,12 @@ private[log] object Log {
 }
 
 
+/**
+  * 一个topic对应的全部LogSegment集合
+  */
 private[log] class Log(val dir: File,
                        val time: Long,
                        val maxSize: Long,
-                       val maxMessageSize: Int,
-                       val flushInterval: Int,
-                       val rollIntervalMs: Long,
                        val needRecovery: Boolean) extends Logging {
 
 
@@ -46,44 +46,51 @@ private[log] class Log(val dir: File,
   private[log] val segments: SegmentList = loadSegments()
 
 
+  /**
+    * 读取日志文件
+    */
   private def loadSegments(): SegmentList = {
-    val accum: ArrayList[LogSegment] = new ArrayList[LogSegment]
-    val ls = dir.listFiles()
-    if (ls != null) {
-      for (file <- ls if file.isFile && file.toString.endsWith(Log.FileSuffix)) {
+    val segments: ArrayList[LogSegment] = new ArrayList[LogSegment]
+    // 读取已有日志文件
+    val files = dir.listFiles()
+    if (files != null) {
+      for (file <- files if file.isFile && file.toString.endsWith(Log.FileSuffix)) {
         if (!file.canRead)
           throw new IOException("Could not read file " + file)
         val filename = file.getName()
         val start = filename.substring(0, filename.length - Log.FileSuffix.length).toLong
-        val messageSet = new FileEntitySet(file, false)
-        accum.add(new LogSegment(file, time, messageSet, start))
+        val set = new FileEntitySet(file, false)
+        segments.add(new LogSegment(file, time, set, start))
       }
     }
 
-    if (accum.size == 0) {
+    if (segments.size == 0) {
+      // 如果日志文件不存在，则从offset 0开始创建
       val newFile = new File(dir, Log.nameFromOffset(0))
       val set = new FileEntitySet(newFile, true)
-      accum.add(new LogSegment(newFile, time, set, 0))
+      segments.add(new LogSegment(newFile, time, set, 0))
     } else {
-      Collections.sort(accum, new Comparator[LogSegment] {
-        def compare(s1: LogSegment, s2: LogSegment): Int = {
-          if (s1.start == s2.start) 0
-          else if (s1.start < s2.start) -1
-          else 1
-        }
+      // 按时间对LogSegment排序
+      Collections.sort(segments, (s1: LogSegment, s2: LogSegment) => {
+        if (s1.start == s2.start) 0
+        else if (s1.start < s2.start) -1
+        else 1
       })
-      validateSegments(accum)
-
-      val last = accum.remove(accum.size - 1)
+      validateSegments(segments)
+      // 将最新的Segment设置为可写
+      val last = segments.remove(segments.size - 1)
       last.entitySet.close()
       info(s"Loading the last segment ${last.file.getAbsolutePath} in mutable mode, recovery $needRecovery")
       val mutable = new LogSegment(last.file, time, new FileEntitySet(last.file, true, new AtomicBoolean(needRecovery)), last.start)
-      accum.add(mutable)
+      segments.add(mutable)
     }
-    new SegmentList(accum.toArray(new Array[LogSegment](accum.size)))
+    //
+    new SegmentList(segments.toArray(new Array[LogSegment](segments.size)))
   }
 
-
+  /**
+    * 校验日志文件是否连续
+    */
   private def validateSegments(segments: ArrayList[LogSegment]) {
     lock synchronized {
       for (i <- 0 until segments.size - 1) {
@@ -95,7 +102,9 @@ private[log] class Log(val dir: File,
     }
   }
 
-
+  /**
+    * 每个topic的日志文件数量
+    */
   def numberOfSegments: Int = segments.view.length
 
 
