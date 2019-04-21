@@ -7,14 +7,14 @@ import hexagon.exceptions.{EntitySizeTooLargeException, InvalidEntityException, 
 import hexagon.tools.{BYTES, ItrTemplate}
 
 class ByteBufferEntitySet(private val buffer: ByteBuffer,
-                          private val initOffset: Long = 0L) extends EntitySet {
+                          private val initOffset: Long = 0L) extends MessageSet {
 
-  def this(compressionCodec: CompressionCodec, entities: Entity*) = {
-    this(EntitySet.createByteBuffer(compressionCodec, entities: _*))
+  def this(compressionCodec: CompressionCodec, entities: Message*) = {
+    this(MessageSet.createByteBuffer(compressionCodec, entities: _*))
   }
 
 
-  def this(entities: Entity*) = this(NoCompressionCodec, entities: _*)
+  def this(entities: Message*) = this(NoCompressionCodec, entities: _*)
 
 
   def getBuffer: ByteBuffer = buffer
@@ -59,28 +59,28 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
 
   override def hashCode: Int = 31 + buffer.hashCode + initOffset.hashCode
 
-  override def iterator: Iterator[EntityAndOffset] = new Itr()
+  override def iterator: Iterator[MessageAndOffset] = new Itr()
 
-  def shallowIterator: Iterator[EntityAndOffset] = new Itr(true)
+  def shallowIterator: Iterator[MessageAndOffset] = new Itr(true)
 
   def verifyEntitySize(maxEntitySize: Int): Unit = {
     for (e <- shallowIterator) {
-      val payloadSize = e.entity.payloadSize()
+      val payloadSize = e.msg.payloadSize()
       if (payloadSize > maxEntitySize)
         throw new EntitySizeTooLargeException(payloadSize, maxEntitySize)
     }
   }
 
-  private def internalIterator(): Iterator[EntityAndOffset] = new Itr()
+  private def internalIterator(): Iterator[MessageAndOffset] = new Itr()
 
-  private class Itr(isShallow: Boolean = false) extends ItrTemplate[EntityAndOffset] {
+  private class Itr(isShallow: Boolean = false) extends ItrTemplate[MessageAndOffset] {
 
     var outerBuffer: ByteBuffer = buffer.slice()
     var currValidBytes: Long = initOffset
-    var innerItr: Iterator[EntityAndOffset] = _
+    var innerItr: Iterator[MessageAndOffset] = _
     var lastEntitySize: Long = 0L
 
-    def makeNextOuter(): EntityAndOffset = {
+    def makeNextOuter(): MessageAndOffset = {
       if (outerBuffer.remaining() < BYTES.Int) {
         return done()
       }
@@ -107,7 +107,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
       buffer.limit(size)
       outerBuffer.position(outerBuffer.position() + size)
 
-      val newEntity = new Entity(buffer)
+      val newEntity = new Message(buffer)
       if (!newEntity.isValid) {
         throw new InvalidEntityException(s"Entity is invalid, compression codec: ${newEntity.compressionCodec}, size: $size, curr offset: $currValidBytes, init offset:$initOffset. ")
       }
@@ -115,7 +115,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
       if (isShallow) {
         currValidBytes += 4 + size
         trace(s"Shallow iterator currValidBytes = $currValidBytes")
-        EntityAndOffset(newEntity, currValidBytes)
+        MessageAndOffset(newEntity, currValidBytes)
       } else {
         newEntity.compressionCodec match {
           case NoCompressionCodec =>
@@ -123,7 +123,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
             debug(s"Entity is uncompressed. Valid byte count = $currValidBytes")
             currValidBytes += 4 + size
             trace(s"currValidBytes = $currValidBytes")
-            EntityAndOffset(newEntity, currValidBytes)
+            MessageAndOffset(newEntity, currValidBytes)
           case _ =>
             debug(s"Entity is compressed. Valid byte count = $currValidBytes")
             innerItr = CompressionUtils.decompress(newEntity).internalIterator()
@@ -137,7 +137,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
       }
     }
 
-    override protected def makeNext(): EntityAndOffset = {
+    override protected def makeNext(): MessageAndOffset = {
       if (isShallow) {
         makeNextOuter()
       } else {
@@ -148,7 +148,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
           val eao = innerItr.next()
           if (!innerItr.hasNext)
             currValidBytes += 4 + lastEntitySize
-          EntityAndOffset(eao.entity, currValidBytes)
+          MessageAndOffset(eao.msg, currValidBytes)
         }
       }
     }

@@ -7,28 +7,28 @@ import hexagon.exceptions.InvalidEntityException
 import hexagon.tools.Logging
 
 
-object EntitySet {
+object MessageSet {
 
-  def entitySetSize(entities: Iterable[Entity]): Int = entities.foldLeft(0)(_ + _.serializedSize)
+  def messageSetSize(entities: Iterable[Message]): Int = entities.foldLeft(0)(_ + _.serializedSize)
 
-  def createByteBuffer(compressionCodec: CompressionCodec, entities: Entity*): ByteBuffer =
+  def createByteBuffer(compressionCodec: CompressionCodec, msgs: Message*): ByteBuffer =
     compressionCodec match {
       case NoCompressionCodec =>
-        val buffer = ByteBuffer.allocate(entitySetSize(entities))
-        for (entity <- entities) {
+        val buffer = ByteBuffer.allocate(messageSetSize(msgs))
+        for (entity <- msgs) {
           entity.serializeTo(buffer)
         }
         buffer.rewind
         buffer
 
       case _ =>
-        entities.size match {
+        msgs.size match {
           case 0 =>
-            val buffer = ByteBuffer.allocate(entitySetSize(entities))
+            val buffer = ByteBuffer.allocate(messageSetSize(msgs))
             buffer.rewind
             buffer
           case _ =>
-            val entity = CompressionUtils.compress(entities, compressionCodec)
+            val entity = CompressionUtils.compress(msgs, compressionCodec)
             val buffer = ByteBuffer.allocate(entity.serializedSize)
             entity.serializeTo(buffer)
             buffer.rewind
@@ -39,21 +39,21 @@ object EntitySet {
 }
 
 
-abstract class EntitySet extends Iterable[EntityAndOffset] with Logging {
+abstract class MessageSet extends Iterable[MessageAndOffset] with Logging {
 
 
   def writeTo(channel: GatheringByteChannel, offset: Long, maxSize: Long): Long
 
 
-  def iterator: Iterator[EntityAndOffset]
+  def iterator: Iterator[MessageAndOffset]
 
 
   def sizeInBytes: Long
 
 
   def validate(): Unit = {
-    for (entityAndOffset <- this)
-      if (!entityAndOffset.entity.isValid)
+    for (msgAndOffset <- this)
+      if (!msgAndOffset.msg.isValid)
         throw new InvalidEntityException()
   }
 

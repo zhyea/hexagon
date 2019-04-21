@@ -55,5 +55,10 @@ private[log] class SegmentList(seq: Seq[LogSegment]) {
 
   def view: Array[LogSegment] = contents.get()
 
+
+  def last: LogSegment = view.last
+
+  def size: Long = view.foldLeft(0L)(_ + _.size)
+
   override def toString: String = view.toString
 }

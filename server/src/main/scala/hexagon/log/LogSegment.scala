@@ -1,18 +1,24 @@
 package hexagon.log
 
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 
-import hexagon.protocol.{ByteBufferEntitySet, FileEntitySet}
+import hexagon.protocol.{ByteBufferEntitySet, FileMessageSet}
 
 
 /**
   * 日志文件描述类，每个LogSegment对应一个日志文件，日志文件名以起始offset命名
   */
-private[log] class LogSegment(val file: File, val time: Long, val entitySet: FileEntitySet, val start: Long) {
+private[log] class LogSegment(val file: File, // log文件实例
+                              val time: Long,
+                              val msgSet: FileMessageSet,
+                              val start: Long) { // 起始offset
+
+  val deletable: AtomicBoolean = new AtomicBoolean(false)
 
   var firstAppendTime: Option[Long] = None
 
-  def size: Long = entitySet.highWaterMark()
+  def size: Long = msgSet.highWaterMark()
 
   private def updateFirstAppendTime(): Unit = {
     if (firstAppendTime.isEmpty)
@@ -21,7 +27,7 @@ private[log] class LogSegment(val file: File, val time: Long, val entitySet: Fil
 
   def append(entities: ByteBufferEntitySet): Unit = {
     if (entities.sizeInBytes > 0) {
-      entitySet.append(entities)
+      msgSet.append(entities)
       updateFirstAppendTime()
     }
   }

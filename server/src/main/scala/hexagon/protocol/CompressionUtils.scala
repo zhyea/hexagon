@@ -64,18 +64,22 @@ object CompressionFactory {
 
 object CompressionUtils extends Logging {
 
-  def compress(entities: Iterable[Entity], compressionCodec: CompressionCodec = DefaultCompressionCodec): Entity = {
+
+  /**
+    * 执行压缩
+    */
+  def compress(entities: Iterable[Message], compressionCodec: CompressionCodec = DefaultCompressionCodec): Message = {
 
     val output: ByteArrayOutputStream = new ByteArrayOutputStream()
 
-    debug(s"Allocating entity byte buffer of size = ${EntitySet.entitySetSize(entities)}")
+    debug(s"Allocating entity byte buffer of size = ${MessageSet.messageSetSize(entities)}")
 
-    val cf: CompressionFacade = CompressionFactory(compressionCodec, output)
-
-    val buffer = ByteBuffer.allocate(EntitySet.entitySetSize(entities))
+    val buffer = ByteBuffer.allocate(MessageSet.messageSetSize(entities))
     entities.foreach(_.serializeTo(buffer))
     buffer.rewind()
 
+
+    val cf: CompressionFacade = CompressionFactory(compressionCodec, output)
     try {
       cf.write(buffer.array())
     } catch {
@@ -86,11 +90,14 @@ object CompressionUtils extends Logging {
       cf.close()
     }
 
-    new Entity(output.toByteArray, compressionCodec)
+    new Message(output.toByteArray, compressionCodec)
   }
 
 
-  def decompress(entity: Entity): ByteBufferEntitySet = {
+  /**
+    * 执行解压缩
+    */
+  def decompress(entity: Message): ByteBufferEntitySet = {
     val output: ByteArrayOutputStream = new ByteArrayOutputStream
     val input: InputStream = new ByteBufferBackedInputStream(entity.payload)
 

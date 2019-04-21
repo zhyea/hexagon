@@ -5,7 +5,7 @@ import java.text.NumberFormat
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong}
 import java.util.{ArrayList, Collections}
 
-import hexagon.protocol.FileEntitySet
+import hexagon.protocol.FileMessageSet
 import hexagon.tools.{Logging, SysTime}
 
 
@@ -31,9 +31,9 @@ private[log] object Log {
 /**
   * 一个topic对应的全部LogSegment集合
   */
-private[log] class Log(val dir: File,
-                       val time: Long,
-                       val maxSize: Long,
+private[log] class Log(val dir: File, // log文件目录
+                       val time: Long, //
+                       val maxSize: Long, // 日志文件大小上限
                        val needRecovery: Boolean) extends Logging {
 
 
@@ -46,8 +46,13 @@ private[log] class Log(val dir: File,
   private[log] val segments: SegmentList = loadSegments()
 
 
+  val name: String = dir.getName
+
+
+  import Log._
+
   /**
-    * 读取日志文件
+    * 获取日志文件
     */
   private def loadSegments(): SegmentList = {
     val segments: ArrayList[LogSegment] = new ArrayList[LogSegment]
@@ -57,9 +62,9 @@ private[log] class Log(val dir: File,
       for (file <- files if file.isFile && file.toString.endsWith(Log.FileSuffix)) {
         if (!file.canRead)
           throw new IOException("Could not read file " + file)
-        val filename = file.getName()
+        val filename = file.getName
         val start = filename.substring(0, filename.length - Log.FileSuffix.length).toLong
-        val set = new FileEntitySet(file, false)
+        val set = new FileMessageSet(file, false)
         segments.add(new LogSegment(file, time, set, start))
       }
     }
@@ -67,7 +72,7 @@ private[log] class Log(val dir: File,
     if (segments.size == 0) {
       // 如果日志文件不存在，则从offset 0开始创建
       val newFile = new File(dir, Log.nameFromOffset(0))
-      val set = new FileEntitySet(newFile, true)
+      val set = new FileMessageSet(newFile, true)
       segments.add(new LogSegment(newFile, time, set, 0))
     } else {
       // 按时间对LogSegment排序
@@ -79,14 +84,19 @@ private[log] class Log(val dir: File,
       validateSegments(segments)
       // 将最新的Segment设置为可写
       val last = segments.remove(segments.size - 1)
-      last.entitySet.close()
+      last.msgSet.close()
       info(s"Loading the last segment ${last.file.getAbsolutePath} in mutable mode, recovery $needRecovery")
-      val mutable = new LogSegment(last.file, time, new FileEntitySet(last.file, true, new AtomicBoolean(needRecovery)), last.start)
+      val mutable = new LogSegment(last.file, time, new FileMessageSet(last.file, true, new AtomicBoolean(needRecovery)), last.start)
       segments.add(mutable)
     }
     //
     new SegmentList(segments.toArray(new Array[LogSegment](segments.size)))
   }
+
+  /**
+    * 日志整体规模
+    */
+  def size: Long = segments.size
 
   /**
     * 校验日志文件是否连续
@@ -108,10 +118,82 @@ private[log] class Log(val dir: File,
   def numberOfSegments: Int = segments.view.length
 
 
-  def close() {
+  /**
+    * 标记删除
+    */
+  def markDeleted(predicate: LogSegment => Boolean): Seq[LogSegment] = {
+    lock synchronized {
+      val view = segments.view
+      val deletable = view.takeWhile(predicate)
+      for (seg <- deletable) {
+        seg.deletable.compareAndSet(false, true)
+      }
+
+      var numToDelete = deletable.length
+
+      //如果要删除全部LogSegment，就还需要一个空LogSegment补上位置
+      if (numToDelete == view.length) {
+        val last = segments.view.last
+        if (last.size > 0) {
+          roll()
+        } else {
+          // 如果最后一个文件本来就是空的，就没必要将之删除
+          last.file.setLastModified(SysTime.mills)
+          numToDelete -= 1
+        }
+      }
+      segments.truncate(numToDelete)
+    }
+  }
+
+
+  /**
+    * 创建一个新LogSegment，并添加到Log集合中
+    */
+  def roll(): Unit = {
+    lock synchronized {
+      val newOffset = nextAppendOffset()
+      val newFile = new File(dir, nameFromOffset(newOffset))
+      if (newFile.exists()) {
+        // 如果文件已存在，将之删除
+        warn(s"newly rolled log segment ${newFile.getName} already exists; deleting it first")
+        newFile.delete()
+      }
+      debug(s"Rolling log '$name' to ${newFile.getName()}")
+      segments.append(new LogSegment(newFile, time, new FileMessageSet(newFile, true), newOffset))
+    }
+  }
+
+
+  def nextAppendOffset(): Long = {
+    flush()
+    val last = segments.view.last
+    last.start + last.size
+  }
+
+
+  /**
+    * flush操作
+    */
+  def flush(): Unit = {
+    if (unflushed.get() > 0) {
+      lock synchronized {
+        debug(s"Flushing log '$name', last flushed: ${lastFlushedTime.get()}, current time: ${SysTime.mills}")
+        segments.view.last.msgSet.flush()
+        unflushed.set(0)
+        lastFlushedTime.set(SysTime.mills)
+      }
+    }
+  }
+
+
+  /**
+    * 关闭资源
+    */
+  def close(): Unit = {
     lock synchronized {
       for (seg <- segments.view)
-        seg.entitySet.close()
+        seg.msgSet.close()
     }
   }
 

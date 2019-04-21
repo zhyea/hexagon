@@ -1,6 +1,7 @@
 package hexagon.config
 
 import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 import hexagon.utils.PropKit._
 
@@ -40,17 +41,27 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
 
 
   /**
-    * BloomFilter Configs
+    * Log Configs
     */
+  val enableAof: Boolean = getBool(props, "enable.aof")
+
   val logDir: String = s"${getString(props, "log.dir")}/$brokerId"
 
   val logFileSize: Long = getLong(props, "log.file.size", 1 * 1024 * 1024 * 1024)
+
+  val logCleanupIntervalMinutes: Int = getInt(props, "log.cleanup.interval.minutes", 10)
+
+  val logRetentionHours: Int = getInt(props, "log.retention.hours", 24 * 7)
+
+  val logRetentionMs: Long = TimeUnit.HOURS.toMillis(logRetentionHours)
+
+  val logRetentionSize: Long = getLong(props, "log.retention.size", -1)
 
 
   /**
     * Zookeeper Configs
     */
-  val enableZooKeeper:Boolean = getBool(props, "enable.zookeeper")
+  val enableZooKeeper: Boolean = getBool(props, "enable.zookeeper")
 
 
 }
