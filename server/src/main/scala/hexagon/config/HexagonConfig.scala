@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import hexagon.utils.PropKit._
 
-private[hexagon] class HexagonConfig(props: Properties)  {
+private[hexagon] class HexagonConfig(props: Properties) {
 
 
   /**
@@ -51,11 +51,17 @@ private[hexagon] class HexagonConfig(props: Properties)  {
 
   val logCleanupIntervalMinutes: Int = getInt(props, "log.cleanup.interval.minutes", 10)
 
+  val logCleanupIntervalMs: Long = TimeUnit.MINUTES.toMillis(logCleanupIntervalMinutes)
+
   val logRetentionHours: Int = getInt(props, "log.retention.hours", 24 * 7)
 
   val logRetentionMs: Long = TimeUnit.HOURS.toMillis(logRetentionHours)
 
   val logRetentionSize: Long = getLong(props, "log.retention.size", -1)
+
+  val logFlushSchedulerIntervalMs: Long = getLong(props, "log.flush.scheduler.interval.ms", 3000)
+
+  val logFlushIntervalMs: Long = getLong(props, "log.flush.interval.ms", 3000)
 
 
   /**

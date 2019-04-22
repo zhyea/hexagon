@@ -45,11 +45,14 @@ private[log] class Log(val dir: File, // log文件目录
 
   private[log] val segments: SegmentList = loadSegments()
 
-
   val name: String = dir.getName
 
 
   import Log._
+
+
+  def getLastFlushedTime: Long = lastFlushedTime.get()
+
 
   /**
     * 获取日志文件
@@ -93,10 +96,12 @@ private[log] class Log(val dir: File, // log文件目录
     new SegmentList(segments.toArray(new Array[LogSegment](segments.size)))
   }
 
+
   /**
     * 日志整体规模
     */
   def size: Long = segments.size
+
 
   /**
     * 校验日志文件是否连续
@@ -111,6 +116,7 @@ private[log] class Log(val dir: File, // log文件目录
       }
     }
   }
+
 
   /**
     * 每个topic的日志文件数量
@@ -159,12 +165,15 @@ private[log] class Log(val dir: File, // log文件目录
         warn(s"newly rolled log segment ${newFile.getName} already exists; deleting it first")
         newFile.delete()
       }
-      debug(s"Rolling log '$name' to ${newFile.getName()}")
+      debug(s"Rolling log '$name' to ${newFile.getName}")
       segments.append(new LogSegment(newFile, time, new FileMessageSet(newFile, true), newOffset))
     }
   }
 
 
+  /**
+    * 下一个Segment的起始offset
+    */
   def nextAppendOffset(): Long = {
     flush()
     val last = segments.view.last

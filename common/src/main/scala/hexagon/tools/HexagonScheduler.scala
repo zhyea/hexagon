@@ -32,7 +32,7 @@ class HexagonScheduler(val numThreads: Int,
   }
 
 
-  def schedule(name: String, func: () => Unit, delay: Long, period: Long, unit: TimeUnit): Unit = {
+  def schedule(name: String, func: () => Unit, delay: Long, period: Long, unit: TimeUnit = TimeUnit.MILLISECONDS): Unit = {
     info(s"Scheduling task $name with initial delay ${unit.toMillis(delay)} ms and period ${unit.toMillis(period)} ms.")
 
     val runnable = Threads.runnable {

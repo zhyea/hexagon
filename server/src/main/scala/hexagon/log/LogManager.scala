@@ -1,6 +1,6 @@
 package hexagon.log
 
-import java.io.File
+import java.io.{File, IOException}
 
 import hexagon.config.HexagonConfig
 import hexagon.tools.{HexagonScheduler, Logging, Pool, SysTime}
@@ -33,8 +33,7 @@ private[hexagon] object LogManager extends Logging {
 private[hexagon] class LogManager(val config: HexagonConfig,
                                   private val scheduler: HexagonScheduler,
                                   private val time: Long,
-                                  needRecovery: Boolean,
-                                  val logCleanupIntervalMs: Long) extends Logging {
+                                  needRecovery: Boolean) extends Logging {
 
   private val logDir = LogManager.getOrCreateLogDir(config.logDir)
   private val lock = new Object
@@ -46,6 +45,20 @@ private[hexagon] class LogManager(val config: HexagonConfig,
 
 
   def startup(): Unit = {
+    if (null != scheduler) {
+      info(s"starting log cleaner every ${config.logCleanupIntervalMs} ms")
+      scheduler.schedule("LogCleanUp",
+        cleanupLogs,
+        60 * 1000,
+        config.logCleanupIntervalMs)
+
+      info(s"Starting log flusher every ${config.logFlushSchedulerIntervalMs} ms")
+      scheduler.schedule("LogFlush",
+        flushAllLogs,
+        60 * 1000,
+        config.logFlushSchedulerIntervalMs)
+
+    }
 
 
   }
@@ -54,9 +67,6 @@ private[hexagon] class LogManager(val config: HexagonConfig,
   def registerNewTopicInZK(topic: String): Unit = {
     ???
   }
-
-
-
 
 
   /**
@@ -175,13 +185,24 @@ private[hexagon] class LogManager(val config: HexagonConfig,
   }
 
 
-  private def flushAllLogs(): Unit ={
+  private def flushAllLogs(): Unit = {
     debug("Flushing the high watermark of all logs")
-    for(log <- getLogIterator){
-      try{
-
-      }catch{
-
+    for (log <- getLogIterator) {
+      try {
+        val timeSinceLastFlash = SysTime.mills - log.getLastFlushedTime
+        if (timeSinceLastFlash > config.logFlushIntervalMs) {
+          log.flush()
+        }
+      } catch {
+        case e => {
+          error(s"Error flushing topic: ${log.name}", e)
+          e match {
+            case _: IOException =>
+              error(s"Halting due to unrecoverable I/O error while flushing logs: ${e.getMessage}", e)
+              Runtime.getRuntime.halt(1)
+            case _ =>
+          }
+        }
       }
     }
   }
