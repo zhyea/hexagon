@@ -51,15 +51,44 @@ private[hexagon] class LogManager(val config: HexagonConfig,
   }
 
 
-  def getOrCreateLog(): Log = {
+  def registerNewTopicInZK(topic: String): Unit = {
     ???
+  }
+
+
+
+
+
+  /**
+    * 获取或创建Log实例
+    */
+  def getOrCreateLog(topic: String): Log = {
+    var hasNewTopic = false
+    var log = logs.get(topic)
+    if (null == log) {
+      log = createLog(topic)
+      val found = logs.putIfNotExists(topic, log)
+      if (null != found) {
+        // 已经有Log实例存在了，理论上不会存在这种情况
+        log.close()
+        log = found
+      } else {
+        hasNewTopic = true
+        info(s"Created log for '$topic'")
+      }
+    }
+
+    if (hasNewTopic) {
+      registerNewTopicInZK(topic)
+    }
+    log
   }
 
 
   /**
     * 创建 Log 实例
     */
-  private def createLog(topic: String): Unit = {
+  private def createLog(topic: String): Log = {
     lock synchronized {
       val d = new File(logDir, topic)
       d.mkdirs()
@@ -68,12 +97,14 @@ private[hexagon] class LogManager(val config: HexagonConfig,
 
   }
 
-
+  /**
+    * 执行日志清理工作
+    */
   def cleanupLogs(): Unit = {
     debug("Beginning logs cleanup ..")
     var total = 0
     val startMs = SysTime.mills
-    val itr = getLogIterator()
+    val itr = getLogIterator
     while (itr.hasNext) {
       val log = itr.next()
       debug(s"Garbage collecting '${log.name}'")
@@ -82,8 +113,10 @@ private[hexagon] class LogManager(val config: HexagonConfig,
     debug(s"Log cleanup completed. $total files deleted in ${SysTime.elapsed(startMs) / 1000} seconds")
   }
 
-
-  private def getLogIterator(): Iterator[Log] = {
+  /**
+    * 获取日志迭代器
+    */
+  private def getLogIterator: Iterator[Log] = {
     logs.values().iterator
   }
 
@@ -124,7 +157,7 @@ private[hexagon] class LogManager(val config: HexagonConfig,
 
   /**
     *
-    * 删除LogSegment
+    * 删除LogSegment，并返回已删除LogSegment的数量
     */
   private def deleteSegments(log: Log, segments: Seq[LogSegment]): Int = {
     var total = 0
@@ -139,5 +172,13 @@ private[hexagon] class LogManager(val config: HexagonConfig,
       }
     }
     total
+  }
+
+
+  private def flushAllLogs(): Unit ={
+    debug("Flushing the high watermark of all logs")
+    for(log <- getLogIterator){
+
+    }
   }
 }

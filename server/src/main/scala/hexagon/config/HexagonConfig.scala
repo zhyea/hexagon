@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import hexagon.utils.PropKit._
 
-private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(props) {
+private[hexagon] class HexagonConfig(props: Properties)  {
 
 
   /**
@@ -63,5 +63,14 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
     */
   val enableZooKeeper: Boolean = getBool(props, "enable.zookeeper")
 
+  val zkConnect: String = getString(props, "zk.connect")
+
+  val zkSessionTimeout: Int = getInt(props, "zk.session.timeout.ms", 6000)
+
+  val zkConnectionTimeout: Int = getInt(props, "zk.connection.timeout.ms", zkSessionTimeout)
+
+  val zkConnectRetryIntervalMs: Int = getInt(props, "zk.connect.retry.interval.ms", 6000)
+
 
 }
+
