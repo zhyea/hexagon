@@ -178,7 +178,11 @@ private[hexagon] class LogManager(val config: HexagonConfig,
   private def flushAllLogs(): Unit ={
     debug("Flushing the high watermark of all logs")
     for(log <- getLogIterator){
+      try{
 
+      }catch{
+
+      }
     }
   }
 }

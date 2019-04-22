@@ -162,7 +162,7 @@ class FileMessageSet(private[protocol] val channel: FileChannel, // 文件channe
   }
 
 
-  def flush() = {
+  def flush(): Unit = {
     checkMutable()
     channel.force(true)
     setHighWaterMark.set(sizeInBytes)
@@ -170,7 +170,7 @@ class FileMessageSet(private[protocol] val channel: FileChannel, // 文件channe
   }
 
 
-  def close() = {
+  def close(): Unit = {
     if (mutable)
       flush()
     channel.close()
