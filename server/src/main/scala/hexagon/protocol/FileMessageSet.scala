@@ -16,6 +16,10 @@ class FileMessageSet(private[protocol] val channel: FileChannel, // 文件channe
                     ) extends MessageSet {
 
   private val setSize = new AtomicLong()
+
+  /**
+    * 标识已确定落地的数据总量
+    */
   private val setHighWaterMark = new AtomicLong()
 
   if (mutable) {
@@ -164,6 +168,7 @@ class FileMessageSet(private[protocol] val channel: FileChannel, // 文件channe
 
   def flush(): Unit = {
     checkMutable()
+    // 执行刷新
     channel.force(true)
     setHighWaterMark.set(sizeInBytes)
     debug("flush high water mark:" + highWaterMark)
