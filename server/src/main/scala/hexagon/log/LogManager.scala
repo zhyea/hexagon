@@ -47,16 +47,16 @@ private[hexagon] class LogManager(val config: HexagonConfig,
   def startup(): Unit = {
     if (null != scheduler) {
       info(s"starting log cleaner every ${config.logCleanupIntervalMs} ms")
-      scheduler.schedule("LogCleanUp",
-        cleanupLogs,
-        60 * 1000,
-        config.logCleanupIntervalMs)
+      scheduler.schedule("kafka-log-cleanup",
+                        cleanupLogs,
+                60 * 1000,
+                        config.logCleanupIntervalMs)
 
       info(s"Starting log flusher every ${config.logFlushSchedulerIntervalMs} ms")
-      scheduler.schedule("LogFlush",
-        flushAllLogs,
-        60 * 1000,
-        config.logFlushSchedulerIntervalMs)
+      scheduler.schedule("kafka-log-flush",
+                        flushAllLogs,
+                60 * 1000,
+                        config.logFlushSchedulerIntervalMs)
 
     }
 
