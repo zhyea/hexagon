@@ -2,7 +2,6 @@
 <configuration>
 
     <property name="HEXAGON_LOG_DIR" value="logs"/>
-    <property name="HEXAGON_LOG_FILE" value="hexagon"/>
     <property name="HEXAGON_LOG_THRESHOLD" value="INFO"/>
 
     <property name="LOG_PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
@@ -16,9 +15,22 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${HEXAGON_LOG_DIR}/${HEXAGON_LOG_FILE}.log</file>
+        <file>${HEXAGON_LOG_DIR}/server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${HEXAGON_LOG_DIR}/${HEXAGON_LOG_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${HEXAGON_LOG_DIR}/server.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>1GB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="STATE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HEXAGON_LOG_DIR}/state-change.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${HEXAGON_LOG_DIR}/state-change.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>1GB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
@@ -31,6 +43,10 @@
 
     <logger name="hexagon" level="${HEXAGON_LOG_THRESHOLD}" additivity="false">
         <appender-ref ref="FILE"/>
+    </logger>
+
+    <logger name="state.change" level="${HEXAGON_LOG_THRESHOLD}" additivity="false">
+        <appender-ref ref="STATE"/>
     </logger>
 
 
