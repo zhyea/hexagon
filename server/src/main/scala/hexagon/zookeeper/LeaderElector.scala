@@ -4,9 +4,12 @@ import hexagon.tools.Logging
 
 trait LeaderElector extends Logging {
 
-  def startup
+  def startup(): Unit
 
-  def amILeader
+  def amILeader(): Boolean
 
+  def elect(): Boolean
+
+  def close(): Unit
 
 }
