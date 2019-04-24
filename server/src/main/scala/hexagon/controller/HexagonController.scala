@@ -6,6 +6,7 @@ import hexagon.config.HexagonConfig
 import hexagon.controller.HexagonController.StateChangeLogger
 import hexagon.network.ZkClient
 import hexagon.tools.Logging
+import hexagon.utils.Locks._
 
 
 object HexagonController extends Logging {
@@ -29,4 +30,20 @@ class HexagonController(val config: HexagonConfig,
   val clientId = s"id_${config.brokerId}—host_${config.host}-port_${config.port}"
 
 
+  /**
+    * 启动Controller
+    */
+  def startup(): Unit = {
+    inLock(controllerContext.controllerLock) {
+      info("Controller starting up")
+      registerSessionExpirationListener()
+      isRunning.set(true)
+
+    }
+  }
+
+
+  private def registerSessionExpirationListener(): Any = {
+    ???
+  }
 }
