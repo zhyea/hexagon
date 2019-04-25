@@ -5,7 +5,6 @@ import java.net.InetAddress
 import hexagon.cluster.Broker
 import hexagon.config.HexagonConfig
 import hexagon.log.LogManager
-import hexagon.network.ZkTools._
 import hexagon.tools.Logging
 import hexagon.utils.JSON
 import hexagon.utils.StrUtils._

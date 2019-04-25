@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.config.HexagonConfig
 import hexagon.controller.HexagonController.StateChangeLogger
-import hexagon.network.ZkClient
 import hexagon.tools.Logging
 import hexagon.utils.Locks._
+import hexagon.zookeeper.ZkClient
 
 
 object HexagonController extends Logging {

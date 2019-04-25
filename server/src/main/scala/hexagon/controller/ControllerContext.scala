@@ -2,7 +2,7 @@ package hexagon.controller
 
 import java.util.concurrent.locks.ReentrantLock
 
-import hexagon.network.ZkClient
+import hexagon.zookeeper.ZkClient
 
 class ControllerContext(val zkClient: ZkClient) {
 
