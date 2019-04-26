@@ -3,14 +3,14 @@ package hexagon.zookeeper
 import hexagon.controller.ControllerContext
 
 class ZooKeeperLeaderElector(controllerContext: ControllerContext,
+                             zkClient: ZkClient,
                              electionPath: String,
-                             onBecomingLeader: () => Unit,
-                             onResigningAsLeader: () => Unit,
+                             listener: LeaderChangeListener,
                              brokerId: Int) extends LeaderElector {
 
-  var leaderId = -1
+  private var leaderId = -1
 
-  val index = electionPath.lastIndexOf("/")
+  private val index = electionPath.lastIndexOf("/")
 
   override def startup(): Unit = ???
 

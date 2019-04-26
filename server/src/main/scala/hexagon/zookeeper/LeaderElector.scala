@@ -12,4 +12,6 @@ trait LeaderElector extends Logging {
 
   def close(): Unit
 
+  def resign(): Boolean
+
 }

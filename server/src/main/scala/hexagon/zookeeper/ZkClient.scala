@@ -52,7 +52,7 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
   /**
     * 创建父节点
     */
-  def createParentPath(path: String): Unit =
+  def createParentPathIfNeeded(path: String): Unit =
     client.checkExists().creatingParentContainersIfNeeded().forPath(path)
 
 
@@ -64,7 +64,7 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
       createEphemeralPath0(path, data)
     } catch {
       case e: NoNodeException => {
-        createParentPath(path)
+        createParentPathIfNeeded(path)
         createEphemeralPath0(path, data)
       }
     }
@@ -102,6 +102,34 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
 
 
   /**
+    * 创建一个临时节点，如出现NodeExistException异常，则尝试进行解决
+    */
+  def createEphemeralPathExpectConflictHandleZKBug(path: String, data: String, expectedCallerData: Any, checker: (String, Any) => Boolean, backoffTime: Int): Unit = {
+    while (true) {
+      try {
+        createEphemeralPathExpectConflict(path, data)
+        return
+      } catch {
+        case e: NodeExistsException => {
+          readDataMaybeNull(path) match {
+            case Some(data) => {
+              if (checker(data, expectedCallerData)) {
+                info(s"Conflict occurred at ephemeral node $data at $path a while back in a different session, hence this node will be backoff to be deleted by ZooKeeper and retry")
+                Thread.sleep(backoffTime)
+              } else {
+                throw e
+              }
+            }
+            case None =>
+          }
+        }
+        case e1: Throwable => throw e1
+      }
+    }
+  }
+
+
+  /**
     * 读取ZooKeeper节点数据
     */
   def readData(path: String): String = {
@@ -121,4 +149,5 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
       case e2: Throwable => throw e2
     }
   }
+
 }

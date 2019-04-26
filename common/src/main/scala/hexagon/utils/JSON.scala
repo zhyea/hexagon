@@ -25,30 +25,30 @@ object JSON {
   }
 
 
-  def fromJson[T](json: String, tr: TypeReference[T]): T = {
+  def fromJson[T](json: String, tr: TypeReference[T]): Option[T] = {
     try {
-      mapper.readValue(json, tr)
+      Some(mapper.readValue(json, tr))
     } catch {
-      case t: Throwable => throw new HexagonException(s"Cannot parse json string: '$json' .", t)
+      case t: Throwable => None
     }
   }
 
 
-  def fromJson[T](json: String, valueType: Class[T]): T = {
+  def fromJson[T](json: String, valueType: Class[T]): Option[T] = {
     try {
-      mapper.readValue(json, valueType)
+      Some(mapper.readValue(json, valueType))
     } catch {
-      case t: Throwable => throw new HexagonException(s"Cannot parse json string: '$json' .", t)
+      case t: Throwable => None
     }
   }
 
 
-  def toMap(json: String): Map[String, Any] = {
+  def toMap(json: String): Option[Map[String, Any]] = {
     val tr = new TypeReference[Map[String, Any]] {}
     try {
       fromJson(json, tr)
     } catch {
-      case t: Throwable => throw new HexagonException(s"Cannot parse json string: '$json' .", t)
+      case t: Throwable => None
     }
   }
 
@@ -58,15 +58,6 @@ object JSON {
       mapper.writeValueAsBytes(value)
     } catch {
       case t: Throwable => throw new HexagonException(s"Cannot serialize an object '$value' into byte array.", t)
-    }
-  }
-
-
-  def parseFull(json: String): Option[Any] = {
-    try {
-      Some(toMap(json))
-    } catch {
-      case t: Throwable => None
     }
   }
 

@@ -16,9 +16,9 @@ object Broker {
     if (brokerInfoString == null)
       throw new BrokerNotAvailableException(s"Broker id $id does not exist")
     try {
-      JSON.parseFull(brokerInfoString) match {
+      JSON.toMap(brokerInfoString) match {
         case Some(m) =>
-          val brokerInfo = m.asInstanceOf[Map[String, Any]]
+          val brokerInfo = m
           val host = brokerInfo("host").asInstanceOf[String]
           val port = brokerInfo("port").asInstanceOf[Int]
           new Broker(id, host, port)
