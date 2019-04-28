@@ -5,7 +5,7 @@ import hexagon.controller.ControllerContext
 class ZooKeeperLeaderElector(controllerContext: ControllerContext,
                              zkClient: ZkClient,
                              electionPath: String,
-                             listener: LeaderChangeListener,
+                             listener: LeaderElectListener,
                              brokerId: Int) extends LeaderElector {
 
   private var leaderId = -1
