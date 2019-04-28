@@ -1,9 +1,13 @@
 package hexagon.zookeeper
 
+import java.nio.charset.StandardCharsets
+
 import hexagon.controller.{Controller, ControllerContext}
 import hexagon.tools.Logging
 import hexagon.utils.JSON
 import hexagon.utils.Locks._
+import org.apache.curator.framework.CuratorFramework
+import org.apache.curator.framework.recipes.cache.{TreeCache, TreeCacheEvent, TreeCacheListener}
 import org.apache.zookeeper.KeeperException.NodeExistsException
 
 sealed trait State
@@ -77,14 +81,17 @@ class ZkLeaderElector(leaderPath: String,
   }
 
 
-  class LeaderChangeListener extends Logging {
+  class LeaderChangeListener(cache:TreeCache) extends Logging {
 
 
     def onDataChange(): Unit = {
       inLock(controllerContext.controllerLock){
-        leaderId = Controller.parse()
+        leaderId = Controller.parse(new String(cache.getCurrentData(leaderPath).getData, StandardCharsets.UTF_8)).brokerId
       }
 
+      cache.getListenable.addListener(new TreeCacheListener {
+        override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = ???
+      })
 
 
       ???
