@@ -22,12 +22,25 @@ object ZkClientTest extends App {
 
   client.start()
 
+
   val cache = new NodeCache(client, "/zy/test")
 
-  cache.getListenable().addListener(() => println("----" + cache.getCurrentData.toString))
+  cache.getListenable().addListener(() => println(cache.getCurrentData))
 
 
   cache.start(true)
+
+
+  TimeUnit.SECONDS.sleep(1L)
+
+  client.delete().forPath("/zy/test")
+
+
+  private class CacheTask extends Runnable {
+    override def run(): Unit = {
+
+    }
+  }
 
   TimeUnit.HOURS.sleep(1L)
 }

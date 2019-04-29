@@ -25,7 +25,7 @@ class HexagonController(val config: HexagonConfig,
 
   private val stateChangeLogger = new StateChangeLogger("state.change")
 
-  private val controllerContext = new ControllerContext(zkClient)
+  private val controllerContext = new ControllerContext(zkClient, config.zkSessionTimeout)
 
   val clientId = s"id_${config.brokerId}—host_${config.host}-port_${config.port}"
 

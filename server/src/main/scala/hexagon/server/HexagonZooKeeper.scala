@@ -6,7 +6,6 @@ import hexagon.cluster.Broker
 import hexagon.config.HexagonConfig
 import hexagon.log.LogManager
 import hexagon.tools.Logging
-import hexagon.utils.JSON
 import hexagon.utils.StrUtils._
 import org.apache.curator.framework.recipes.cache.NodeCacheListener
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
@@ -19,7 +18,7 @@ import org.apache.zookeeper.KeeperException.NodeExistsException
   */
 class HexagonZooKeeper(config: HexagonConfig, logManager: LogManager) extends Logging {
 
-  private val brokerIdPath: String = BrokerIdsPath + "/" + config.brokerId
+  private val brokerIdPath: String ="/" + config.brokerId
   private var zkClient: CuratorFramework = null
 
   private var topics: List[String] = Nil
@@ -49,7 +48,7 @@ class HexagonZooKeeper(config: HexagonConfig, logManager: LogManager) extends Lo
     val broker = new Broker(config.brokerId, hostName, config.port)
 
     try {
-      createEphemeralPath(zkClient, brokerIdPath, JSON.toJson(broker))
+      //createEphemeralPath(zkClient, brokerIdPath, JSON.toJson(broker))
     } catch {
       case e: NodeExistsException => throw new IllegalStateException(s"A broker is already registered on the path '$brokerIdPath'.")
     }
@@ -67,7 +66,7 @@ class HexagonZooKeeper(config: HexagonConfig, logManager: LogManager) extends Lo
 
 
   def registerTopicInZkInternal(topic: String): Unit = {
-    val brokerTopicPath = BrokerTopicsPath + "/" + topic + config.brokerId
+   // val brokerTopicPath = BrokerTopicsPath + "/" + topic + config.brokerId
 
   }
 

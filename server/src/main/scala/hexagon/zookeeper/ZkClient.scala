@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets
 import hexagon.config.ZooKeeperConfig
 import hexagon.tools.Logging
 import org.apache.curator.framework.CuratorFrameworkFactory
+import org.apache.curator.framework.recipes.cache.NodeCache
 import org.apache.curator.retry.RetryForever
 import org.apache.zookeeper.CreateMode.EPHEMERAL
 import org.apache.zookeeper.KeeperException._
@@ -147,6 +148,30 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
     } catch {
       case e: NoNodeException => None
       case e2: Throwable => throw e2
+    }
+  }
+
+
+  /**
+    * 创建NodeCache
+    */
+  def createNodeCache(path: String): NodeCache = {
+    new NodeCache(client, path)
+  }
+
+
+  /**
+    * 删除路径
+    */
+  def deletePath(path: String): Boolean = {
+    try {
+      client.delete().forPath(path)
+      true
+    } catch {
+      case e: NoNodeException =>
+        info(s"$path deleted during connection loss; this is ok")
+        false
+      case e1: Throwable => throw e1
     }
   }
 

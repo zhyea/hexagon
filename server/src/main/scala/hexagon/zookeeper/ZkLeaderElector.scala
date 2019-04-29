@@ -6,8 +6,7 @@ import hexagon.controller.{Controller, ControllerContext}
 import hexagon.tools.Logging
 import hexagon.utils.JSON
 import hexagon.utils.Locks._
-import org.apache.curator.framework.CuratorFramework
-import org.apache.curator.framework.recipes.cache.{TreeCache, TreeCacheEvent, TreeCacheListener}
+import org.apache.curator.framework.recipes.cache.{ChildData, NodeCacheListener}
 import org.apache.zookeeper.KeeperException.NodeExistsException
 
 sealed trait State
@@ -21,13 +20,15 @@ class ZkLeaderElector(leaderPath: String,
 
   private var leaderId = -1
   private val zkClient = controllerContext.zkClient
+  private val cache = zkClient.createNodeCache(leaderPath)
 
   zkClient.createParentPathIfNeeded(leaderPath)
 
 
   override def startup(): Unit = {
     inLock(controllerContext.controllerLock) {
-      zkClient
+      cache.start(true)
+
     }
   }
 
@@ -67,10 +68,16 @@ class ZkLeaderElector(leaderPath: String,
     amILeader()
   }
 
-  override def close(): Unit = ???
+  override def close(): Unit = {
+    leaderId = -1
+    cache.close()
+  }
 
 
-  override def resign(): Boolean = ???
+  override def resign(): Boolean = {
+    leaderId = -1
+    zkClient.deletePath(leaderPath)
+  }
 
 
   private def getControllerId: Int = {
@@ -81,27 +88,38 @@ class ZkLeaderElector(leaderPath: String,
   }
 
 
-  class LeaderChangeListener(cache:TreeCache) extends Logging {
+  class LeaderChangeListener extends NodeCacheListener with Logging {
 
+    override def nodeChanged(): Unit = {
+      val data = cache.getCurrentData
+      if (null == data) onNodeDelete()
+      else onDataChange(data)
+    }
 
-    def onDataChange(): Unit = {
-      inLock(controllerContext.controllerLock){
-        leaderId = Controller.parse(new String(cache.getCurrentData(leaderPath).getData, StandardCharsets.UTF_8)).brokerId
+    private def onDataChange(data: ChildData): Unit = {
+      inLock(controllerContext.controllerLock) {
+        leaderId = readLeaderId(data)
+        info(s"New leader is $leaderId")
       }
-
-      cache.getListenable.addListener(new TreeCacheListener {
-        override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = ???
-      })
-
-
-      ???
     }
 
 
-    def onDataDelete(): Unit = {
-      ???
+    private def onNodeDelete(): Unit = {
+      inLock(controllerContext.controllerLock) {
+        debug(s"$brokerId leader change listener fired for path $leaderPath to handle data deleted: trying to elect as a leader")
+        if (amILeader()) {
+          listener.onResigningAsLeader(zkClient)
+        }
+        elect()
+      }
     }
 
+
+    def readLeaderId(data: ChildData): Int = {
+      val bytes = data.getData
+      val controllerInfo = new String(bytes, StandardCharsets.UTF_8)
+      Controller.parse(controllerInfo).brokerId
+    }
   }
 
 }
