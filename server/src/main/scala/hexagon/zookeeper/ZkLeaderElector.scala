@@ -9,8 +9,6 @@ import hexagon.utils.Locks._
 import org.apache.curator.framework.recipes.cache.{ChildData, NodeCacheListener}
 import org.apache.zookeeper.KeeperException.NodeExistsException
 
-sealed trait State
-
 
 class ZkLeaderElector(leaderPath: String,
                       controllerContext: ControllerContext,
@@ -27,8 +25,9 @@ class ZkLeaderElector(leaderPath: String,
 
   override def startup(): Unit = {
     inLock(controllerContext.controllerLock) {
+      cache.getListenable.addListener(new LeaderChangeListener())
       cache.start(true)
-
+      elect()
     }
   }
 
@@ -58,7 +57,6 @@ class ZkLeaderElector(leaderPath: String,
           debug(s"Broker $leaderId was elected as leader instead of broker $brokerId")
         else
           warn("A leader has been elected but just resigned, this will result in another round of election")
-
 
       case e1: Throwable =>
         error(s"Error while electing or becoming leader on broker $brokerId", e1)

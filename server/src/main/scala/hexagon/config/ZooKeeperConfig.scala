@@ -7,7 +7,10 @@ import hexagon.utils.PropKit.{getBool, getInt, getString}
 class ZooKeeperConfig(val props: Properties) {
   /**
     * Zookeeper Configs
+    *
     */
+  val zkNamespace = "hexagon"
+
   val enableZooKeeper: Boolean = getBool(props, "enable.zookeeper")
 
   val zkConnect: String = getString(props, "zk.connect")

@@ -7,10 +7,13 @@ import hexagon.controller.HexagonController.StateChangeLogger
 import hexagon.tools.Logging
 import hexagon.utils.Locks._
 import hexagon.zookeeper.ZkClient
+import org.apache.curator.framework.CuratorFramework
+import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 
 
 object HexagonController extends Logging {
 
+  val ControllerPath:String = "/controller"
 
   case class StateChangeLogger(name: String) extends Logging
 
@@ -23,7 +26,7 @@ class HexagonController(val config: HexagonConfig,
 
   private val isRunning: AtomicBoolean = new AtomicBoolean(true)
 
-  private val stateChangeLogger = new StateChangeLogger("state.change")
+  private val stateChangeLogger =  StateChangeLogger("state.change")
 
   private val controllerContext = new ControllerContext(zkClient, config.zkSessionTimeout)
 
@@ -44,6 +47,16 @@ class HexagonController(val config: HexagonConfig,
 
 
   private def registerSessionExpirationListener(): Any = {
+    zkClient.
     ???
+  }
+
+
+
+  class SessionExpirationListener extends ConnectionStateListener with Logging{
+
+
+    override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = ???
+
   }
 }

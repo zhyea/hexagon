@@ -29,6 +29,7 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
     .retryPolicy(new RetryForever(config.zkConnectRetryIntervalMs))
     .connectionTimeoutMs(config.zkConnectionTimeout)
     .sessionTimeoutMs(config.zkSessionTimeout)
+    .namespace(config.zkNamespace)
     .build()
 
 
@@ -174,5 +175,8 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
       case e1: Throwable => throw e1
     }
   }
+
+
+client.getConnectionStateListenable.addListener()
 
 }
