@@ -2,8 +2,8 @@ package hexagon.zookeeper
 
 trait LeaderElectListener {
 
-  def onBecomingLeader(client: ZkClient): Unit = ???
+  def onBecomingLeader(): Unit
 
-  def onResigningAsLeader(client: ZkClient): Unit = ???
+  def onResigningAsLeader(): Unit
 
 }

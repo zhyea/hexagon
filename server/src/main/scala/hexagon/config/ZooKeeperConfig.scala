@@ -11,6 +11,8 @@ class ZooKeeperConfig(val props: Properties) {
     */
   val zkNamespace = "hexagon"
 
+  val ControllerPath: String = "/controller"
+
   val enableZooKeeper: Boolean = getBool(props, "enable.zookeeper")
 
   val zkConnect: String = getString(props, "zk.connect")

@@ -2,9 +2,10 @@ package hexagon.other
 
 import java.util.concurrent.TimeUnit
 
-import org.apache.curator.framework.CuratorFrameworkFactory
-import org.apache.curator.framework.recipes.cache.NodeCache
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 import org.apache.curator.retry.ExponentialBackoffRetry
+import org.apache.curator.framework.state.ConnectionState._
 
 object ZkClientTest extends App {
 
@@ -23,24 +24,24 @@ object ZkClientTest extends App {
   client.start()
 
 
-  val cache = new NodeCache(client, "/zy/test")
-
-  cache.getListenable().addListener(() => println(cache.getCurrentData))
+  client.getConnectionStateListenable.addListener(new Listener)
 
 
-  cache.start(true)
+  class Listener extends ConnectionStateListener {
 
+    override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
+      newState match {
+        case CONNECTED => println("------------------------------------------------------ this is connected")
+        case SUSPENDED => println("------------------------------------------------------ this is suspended")
+        case RECONNECTED => println("------------------------------------------------------ this is reconnected")
+        case LOST => println("------------------------------------------------------ this is lost")
+        case READ_ONLY => println("------------------------------------------------------ this is read only")
 
-  TimeUnit.SECONDS.sleep(1L)
-
-  client.delete().forPath("/zy/test")
-
-
-  private class CacheTask extends Runnable {
-    override def run(): Unit = {
-
+      }
     }
   }
 
+
   TimeUnit.HOURS.sleep(1L)
+
 }

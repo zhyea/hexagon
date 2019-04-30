@@ -6,6 +6,7 @@ import hexagon.config.ZooKeeperConfig
 import hexagon.tools.Logging
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.recipes.cache.NodeCache
+import org.apache.curator.framework.state.ConnectionStateListener
 import org.apache.curator.retry.RetryForever
 import org.apache.zookeeper.CreateMode.EPHEMERAL
 import org.apache.zookeeper.KeeperException._
@@ -177,6 +178,11 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
   }
 
 
-client.getConnectionStateListenable.addListener()
+  /**
+    * 添加ZK连接状态监听器
+    */
+  def registerConnectionStateListener(listener: ConnectionStateListener): Unit = {
+    client.getConnectionStateListenable.addListener(listener)
+  }
 
 }
