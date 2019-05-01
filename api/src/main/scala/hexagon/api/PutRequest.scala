@@ -12,7 +12,7 @@ object PutRequest {
   def readFrom(buffer: ByteBuffer): PutRequest = {
     val topic = readShortString(buffer)
     val msg = readShortString(buffer)
-    new PutRequest(topic, msg)
+    PutRequest(topic, msg)
   }
 
 }

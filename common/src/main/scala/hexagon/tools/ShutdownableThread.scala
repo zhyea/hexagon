@@ -27,9 +27,7 @@ abstract class ShutdownableThread(val name: String, val isInterruptible: Boolean
       false
   }
 
-  /**
-    * After calling initiateShutdown(), use this API to wait until the shutdown is complete
-    */
+
   def awaitShutdown(): Unit = {
     shutdownLatch.await()
     info("Shutdown completed")

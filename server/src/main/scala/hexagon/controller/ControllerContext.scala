@@ -9,5 +9,6 @@ class ControllerContext(val zkClient: ZkClient,
 
   val controllerLock: ReentrantLock = new ReentrantLock()
 
+  var epoch: Int = 0
 
 }

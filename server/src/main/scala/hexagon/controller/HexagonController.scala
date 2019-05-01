@@ -3,7 +3,6 @@ package hexagon.controller
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.config.HexagonConfig
-import hexagon.controller.HexagonController.StateChangeLogger
 import hexagon.tools.Logging
 import hexagon.utils.Locks._
 import hexagon.zookeeper.{LeaderElectListener, ZkClient, ZkLeaderElector}
@@ -13,7 +12,10 @@ import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListe
 
 object HexagonController extends Logging {
 
+  val stateChangeLogger: StateChangeLogger = StateChangeLogger("state.change")
+
   case class StateChangeLogger(name: String) extends Logging
+
 
 }
 
@@ -21,9 +23,6 @@ object HexagonController extends Logging {
 class HexagonController(val config: HexagonConfig,
                         val zkClient: ZkClient,
                         val brokerState: BrokerState) extends Logging {
-
-
-  private val stateChangeLogger = StateChangeLogger("state.change")
   private val isRunning: AtomicBoolean = new AtomicBoolean(true)
   private val controllerContext = new ControllerContext(zkClient, config.zkSessionTimeout)
   private val controllerElector = new ZkLeaderElector(config.ControllerPath, controllerContext, new LeaderChangeListener, config.brokerId)

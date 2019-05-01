@@ -10,4 +10,10 @@ object RequestKeys {
 
   val MultiQuery: Short = 4
 
+  val LeaderAndIsr: Short = 5
+
+  val StopReplica: Short = 6
+
+  val UpdateMetadata: Short = 6
+
 }
