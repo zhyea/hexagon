@@ -6,6 +6,11 @@ import java.nio.channels._
 import hexagon.api.RequestOrResponse
 import hexagon.tools.Logging
 
+
+object BlockingChannel {
+  val UseDefaultBufferSize: Int = -1
+}
+
 class BlockingChannel(val host: String,
                       val port: Int,
                       val readBufferSize: Int = -1,

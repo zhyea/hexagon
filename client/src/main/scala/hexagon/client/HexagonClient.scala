@@ -1,11 +1,12 @@
 package hexagon.client
 
 import hexagon.api.PutRequest
+import hexagon.network.BlockingChannel
 
 class HexagonClient(override val host: String,
                     override val port: Int,
-                    override val readBufferSize: Int = -1,
-                    override val writeBufferSize: Int = -1,
+                    override val readBufferSize: Int = BlockingChannel.UseDefaultBufferSize,
+                    override val writeBufferSize: Int = BlockingChannel.UseDefaultBufferSize,
                     override val socketTimeout: Int = 3600)
   extends BinaryClient(host, port, readBufferSize, writeBufferSize, socketTimeout) {
 

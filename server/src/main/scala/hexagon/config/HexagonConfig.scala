@@ -25,6 +25,10 @@ private[hexagon] class HexagonConfig(props: Properties) extends ZooKeeperConfig(
 
   val maxSocketRequestSize: Int = getInt(props, "socket.request.max.bytes", Int.MaxValue)
 
+  val controllerMessageQueueSize: Int = getInt(props, "controller.message.queue.size", Int.MaxValue)
+
+  val controllerSocketTimeoutMs:Int = getInt(props, "controller.socket.timeout.ms", Int.MaxValue)
+
 
   /**
     * BloomFilter Configs

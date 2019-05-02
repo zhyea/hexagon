@@ -2,7 +2,10 @@ package hexagon.controller
 
 import java.util.concurrent.locks.ReentrantLock
 
+import hexagon.cluster.Broker
 import hexagon.zookeeper.ZkClient
+
+import scala.collection.{Set, mutable}
 
 class ControllerContext(val zkClient: ZkClient,
                         val zkSessionTimeout: Int) {
@@ -10,5 +13,26 @@ class ControllerContext(val zkClient: ZkClient,
   val controllerLock: ReentrantLock = new ReentrantLock()
 
   var epoch: Int = 0
+
+
+  var shuttingDownBrokerIds: mutable.Set[Int] = mutable.Set.empty
+
+  private var liveBrokersUnderlying: Set[Broker] = Set.empty
+  private var liveBrokerIdsUnderlying: Set[Int] = Set.empty
+
+
+  def setLiveBrokers(brokers: Set[Broker]): Unit = {
+    liveBrokersUnderlying = brokers
+    liveBrokerIdsUnderlying = liveBrokersUnderlying.map(_.id)
+  }
+
+  def liveBrokers: Set[Broker] = liveBrokersUnderlying.filter(broker => !shuttingDownBrokerIds.contains(broker.id))
+
+  def liveBrokerIds: Set[Int] = liveBrokerIdsUnderlying.diff(shuttingDownBrokerIds)
+
+  def liveOrShuttingDownBrokerIds: Set[Int] = liveBrokerIdsUnderlying
+
+  def liveOrShuttingDownBrokers: Set[Broker] = liveBrokersUnderlying
+
 
 }

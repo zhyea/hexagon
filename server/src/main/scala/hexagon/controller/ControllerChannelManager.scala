@@ -1,6 +1,6 @@
 package hexagon.controller
 
-import java.util.concurrent.BlockingQueue
+import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
 
 import hexagon.api._
 import hexagon.cluster.Broker
@@ -8,8 +8,74 @@ import hexagon.config.HexagonConfig
 import hexagon.network.{BlockingChannel, Receive}
 import hexagon.tools.{Logging, ShutdownableThread}
 
-class ControllerChannelManager(controllerContext: ControllerContext, config: HexagonConfig) extends Logging {
+import scala.collection.mutable.HashMap
 
+class ControllerChannelManager(controllerContext: ControllerContext, config: HexagonConfig) extends Logging {
+  private val controllerBrokers = new HashMap[Int, ControllerBrokerWrapper]
+  private val brokerLock = new Object
+
+  controllerContext.liveBrokers.foreach(addNewBroker)
+
+
+  def startup(): Unit = {
+    brokerLock synchronized {
+      controllerBrokers.foreach(broker => startRequestSendThread(broker._1))
+    }
+  }
+
+  def shutdown(): Unit = {
+    brokerLock synchronized {
+      controllerBrokers.foreach(broker => removeExistingBroker(broker._1))
+    }
+  }
+
+  def sendRequest(brokerId: Int, request: RequestOrResponse, callback: RequestOrResponse => Unit = null): Unit = {
+    brokerLock synchronized {
+      val stateInfoOpt = controllerBrokers.get(brokerId)
+      stateInfoOpt match {
+        case Some(stateInfo) =>
+          stateInfo.messageQueue.put((request, callback))
+        case None =>
+          warn(s"Not sending request ${request.toString} to broker $brokerId, since it is offline.")
+      }
+    }
+  }
+
+
+  def removeBroker(brokerId: Int) {
+    brokerLock synchronized {
+      removeExistingBroker(brokerId)
+    }
+  }
+
+  private def addNewBroker(broker: Broker) {
+    val messageQueue = new LinkedBlockingQueue[(RequestOrResponse, RequestOrResponse => Unit)](config.controllerMessageQueueSize)
+    debug(s"Controller ${config.brokerId} trying to connect to broker ${broker.id}")
+    val channel = new BlockingChannel(broker.host, broker.port,
+      BlockingChannel.UseDefaultBufferSize,
+      BlockingChannel.UseDefaultBufferSize,
+      config.controllerSocketTimeoutMs)
+    val requestThread = new RequestSendThread(config.brokerId, controllerContext, broker, channel, messageQueue)
+    requestThread.setDaemon(false)
+    controllerBrokers.put(broker.id, ControllerBrokerWrapper(channel, broker, messageQueue, requestThread))
+  }
+
+  private def removeExistingBroker(brokerId: Int) {
+    try {
+      controllerBrokers(brokerId).channel.disconnect()
+      controllerBrokers(brokerId).messageQueue.clear()
+      controllerBrokers(brokerId).requestSendThread.shutdown()
+      controllerBrokers.remove(brokerId)
+    } catch {
+      case e: Throwable => error("Error while removing broker by the controller", e)
+    }
+  }
+
+  private def startRequestSendThread(brokerId: Int) {
+    val requestThread = controllerBrokers(brokerId).requestSendThread
+    if (requestThread.getState == Thread.State.NEW)
+      requestThread.start()
+  }
 }
 
 
@@ -87,3 +153,11 @@ class RequestSendThread(val controllerId: Int,
     }
   }
 }
+
+
+case class ControllerBrokerWrapper(channel: BlockingChannel,
+                                   broker: Broker,
+                                   messageQueue: BlockingQueue[(RequestOrResponse, RequestOrResponse => Unit)],
+                                   requestSendThread: RequestSendThread)
+
+case class StopReplicaRequestInfo(replica: Int, deleteTopic: Boolean, callback: RequestOrResponse => Unit = null)
