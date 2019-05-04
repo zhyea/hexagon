@@ -86,15 +86,10 @@ class ZkLeaderElector(leaderPath: String,
   }
 
 
-  class LeaderChangeListener extends NodeCacheListener with Logging {
+  class LeaderChangeListener extends NodeListener(cache) {
 
-    override def nodeChanged(): Unit = {
-      val data = cache.getCurrentData
-      if (null == data) onNodeDelete()
-      else onDataChange(data)
-    }
 
-    private def onDataChange(data: ChildData): Unit = {
+    override def onDataChange(data: ChildData): Unit = {
       inLock(controllerContext.controllerLock) {
         leaderId = readLeaderId(data)
         info(s"New leader is $leaderId")
@@ -102,7 +97,7 @@ class ZkLeaderElector(leaderPath: String,
     }
 
 
-    private def onNodeDelete(): Unit = {
+    override def onNodeDelete(): Unit = {
       inLock(controllerContext.controllerLock) {
         debug(s"$brokerId leader change listener fired for path $leaderPath to handle data deleted: trying to elect as a leader")
         if (amILeader()) {

@@ -17,6 +17,11 @@ class ControllerContext(val zkClient: ZkClient,
 
   var shuttingDownBrokerIds: mutable.Set[Int] = mutable.Set.empty
 
+  var topicReplicaAssignment: mutable.Map[String, Seq[Int]] = mutable.Map.empty
+
+  var topicLeadershipInfo: mutable.Map[String, LeaderIsrAndControllerEpoch] = mutable.Map.empty
+
+
   private var liveBrokersUnderlying: Set[Broker] = Set.empty
   private var liveBrokerIdsUnderlying: Set[Int] = Set.empty
 
