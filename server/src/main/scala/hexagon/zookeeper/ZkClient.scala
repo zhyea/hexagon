@@ -2,10 +2,12 @@ package hexagon.zookeeper
 
 import java.nio.charset.StandardCharsets
 
+import hexagon.cluster.LeaderAndIsr
 import hexagon.config.ZooKeeperConfig
 import hexagon.tools.Logging
+import hexagon.utils.JSON
 import org.apache.curator.framework.CuratorFrameworkFactory
-import org.apache.curator.framework.recipes.cache.NodeCache
+import org.apache.curator.framework.recipes.cache.{NodeCache, PathChildrenCache}
 import org.apache.curator.framework.state.ConnectionStateListener
 import org.apache.curator.retry.RetryForever
 import org.apache.zookeeper.CreateMode.EPHEMERAL
@@ -20,10 +22,9 @@ object ZkClient extends Logging {
 }
 
 
-/**
-  *
-  */
 class ZkClient(val config: ZooKeeperConfig) extends Logging {
+
+  import ZkClient._
 
   private val client = CuratorFrameworkFactory.builder()
     .connectString(config.zkConnect)
@@ -163,6 +164,14 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
 
 
   /**
+    * 创建PathChildrenCache
+    */
+  def createPathChildrenCache(path: String, cacheData: Boolean): PathChildrenCache = {
+    new PathChildrenCache(client, path, cacheData)
+  }
+
+
+  /**
     * 删除路径
     */
   def deletePath(path: String): Boolean = {
@@ -183,6 +192,24 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
     */
   def registerConnectionStateListener(listener: ConnectionStateListener): Unit = {
     client.getConnectionStateListenable.addListener(listener)
+  }
+
+
+  /**
+    * 获取zk中的topic路径
+    */
+  def getTopicPath(topic: String): String = BrokerTopicsPath + "/" + topic
+
+
+  /**
+    * 读取每个topic的leader和isr信息
+    */
+  def getLeaderAndIsrForTopic(topic: String): Option[LeaderAndIsr] = {
+    val leaderAndIsrOpt = readDataMaybeNull(getTopicPath(topic))
+    leaderAndIsrOpt match {
+      case Some(leaderAndIsrStr) => JSON.fromJson(leaderAndIsrStr, classOf[LeaderAndIsr])
+      case None => None
+    }
   }
 
 }

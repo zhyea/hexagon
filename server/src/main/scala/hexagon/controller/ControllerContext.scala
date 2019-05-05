@@ -21,6 +21,8 @@ class ControllerContext(val zkClient: ZkClient,
 
   var topicLeadershipInfo: mutable.Map[String, LeaderIsrAndControllerEpoch] = mutable.Map.empty
 
+  var topicBeingReassigned: mutable.Map[String, Seq[Int]] = new mutable.HashMap
+
 
   private var liveBrokersUnderlying: Set[Broker] = Set.empty
   private var liveBrokerIdsUnderlying: Set[Int] = Set.empty

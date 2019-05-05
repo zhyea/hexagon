@@ -91,7 +91,7 @@ class ReassignedTopicLeaderSelector(controllerContext: ControllerContext) extend
     * The reassigned replicas are already in the ISR when selectLeader is called.
     */
   def selectLeader(topic: String, currentLeaderAndIsr: LeaderAndIsr): (LeaderAndIsr, Seq[Int]) = {
-    val reassignedInSyncReplicas = controllerContext.partitionsBeingReassigned(topic).newReplicas
+    val reassignedInSyncReplicas = controllerContext.topicBeingReassigned(topic).newReplicas
     val currentLeaderEpoch = currentLeaderAndIsr.leaderEpoch
     val currentLeaderIsrZkPathVersion = currentLeaderAndIsr.zkVersion
     val aliveReassignedInSyncReplicas = reassignedInSyncReplicas.filter(r => controllerContext.liveBrokerIds.contains(r) &&
