@@ -15,10 +15,16 @@ abstract class PathChildrenListener(val cache: PathChildrenCache) extends PathCh
   def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
     val eventType = event.getType
     eventType match {
-      case CHILD_UPDATED => onDataChange(event.getData)
+      case CHILD_UPDATED => onChildUpdate(event.getData)
+      case CHILD_ADDED => onChildAdded(event.getData)
+      case CHILD_REMOVED => onChildRemoved(event.getData)
     }
   }
 
-  def onDataChange(data: ChildData): Unit
+  def onChildUpdate(data: ChildData): Unit
+
+  def onChildAdded(data: ChildData): Unit
+
+  def onChildRemoved(data: ChildData): Unit
 
 }

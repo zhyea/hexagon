@@ -1,6 +1,5 @@
 package hexagon.controller
 
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.cluster.TopicAndReplica
@@ -8,7 +7,7 @@ import hexagon.config.HexagonConfig
 import hexagon.controller.HexagonController.StateChangeLogger
 import hexagon.tools.Logging
 import hexagon.utils.Locks
-import hexagon.zookeeper.{NodeListener, PathChildrenListener, ZkClient}
+import hexagon.zookeeper.PathChildrenListener
 import org.apache.curator.framework.recipes.cache.{ChildData, PathChildrenCache}
 
 import scala.collection.mutable
@@ -22,7 +21,6 @@ class ReplicaStateMachine(controllerContext: ControllerContext,
   private val zkClient = controllerContext.zkClient
   private val replicaState: mutable.Map[TopicAndReplica, ReplicaState] = mutable.Map.empty
   private val brokerChangeListener = new BrokerChangeListener()
-  private val brokerRequestBatch = new ControllerBrokerRequestBatch(controller)
   private val hasStarted = new AtomicBoolean(false)
 
   private val brokerCache: PathChildrenCache = zkClient.createPathChildrenCache(config.BrokerIdsPath, true)
@@ -30,13 +28,13 @@ class ReplicaStateMachine(controllerContext: ControllerContext,
 
   class BrokerChangeListener() extends PathChildrenListener(brokerCache) {
 
-    override def onDataChange(childData: ChildData): Unit = {
+    override def onChildUpdate(childData: ChildData): Unit = {
 
       Locks.inLock(controllerContext.controllerLock) {
         if (null != childData && hasStarted.get()) {
           try {
             val path = childData.getPath
-            val data = new String(childData.getData, StandardCharsets.UTF_8)
+            val brokerId = getBrokerId(path)
 
 
           } catch {

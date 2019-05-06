@@ -11,7 +11,7 @@ class ReassignedTopicIsrChangeListener(cache: PathChildrenCache,
                                        onTopicReassigned: (String, Seq[Int]) => Unit) extends PathChildrenListener(cache) {
 
 
-  override def onDataChange(data: ChildData): Unit = {
+  override def onChildUpdate(data: ChildData): Unit = {
 
     inLock(controllerContext.controllerLock) {
       val topic = readTopic(data.getPath)
@@ -47,4 +47,7 @@ class ReassignedTopicIsrChangeListener(cache: PathChildrenCache,
     path.substring(path.lastIndexOf("/"))
   }
 
+  override def onChildAdded(data: ChildData): Unit = ???
+
+  override def onChildRemoved(data: ChildData): Unit = ???
 }
