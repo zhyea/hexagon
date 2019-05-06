@@ -13,6 +13,10 @@ class ZooKeeperConfig(val props: Properties) {
 
   val ControllerPath: String = "/controller"
 
+  val BrokerIdsPath: String = "/brokers/ids"
+
+  val BrokerTopicsPath: String = "/brokers/topics"
+
   val enableZooKeeper: Boolean = getBool(props, "enable.zookeeper")
 
   val zkConnect: String = getString(props, "zk.connect")

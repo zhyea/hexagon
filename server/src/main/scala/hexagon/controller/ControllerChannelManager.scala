@@ -8,10 +8,10 @@ import hexagon.config.HexagonConfig
 import hexagon.network.{BlockingChannel, Receive}
 import hexagon.tools.{Logging, ShutdownableThread}
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable
 
 class ControllerChannelManager(controllerContext: ControllerContext, config: HexagonConfig) extends Logging {
-  private val controllerBrokers = new HashMap[Int, ControllerBrokerWrapper]
+  private val controllerBrokers = new mutable.HashMap[Int, ControllerBrokerWrapper]
   private val brokerLock = new Object
 
   controllerContext.liveBrokers.foreach(addNewBroker)
@@ -31,8 +31,8 @@ class ControllerChannelManager(controllerContext: ControllerContext, config: Hex
 
   def sendRequest(brokerId: Int, request: RequestOrResponse, callback: RequestOrResponse => Unit = null): Unit = {
     brokerLock synchronized {
-      val stateInfoOpt = controllerBrokers.get(brokerId)
-      stateInfoOpt match {
+      val brokerWrapperOpt = controllerBrokers.get(brokerId)
+      brokerWrapperOpt match {
         case Some(stateInfo) =>
           stateInfo.messageQueue.put((request, callback))
         case None =>
@@ -42,12 +42,27 @@ class ControllerChannelManager(controllerContext: ControllerContext, config: Hex
   }
 
 
+  def addBroker(broker: Broker): Unit = {
+    brokerLock synchronized {
+      if (!controllerBrokers.contains(broker.id)) {
+        addNewBroker(broker)
+        startRequestSendThread(broker.id)
+      }
+    }
+  }
+
+  /**
+    * 移除Broker
+    */
   def removeBroker(brokerId: Int) {
     brokerLock synchronized {
       removeExistingBroker(brokerId)
     }
   }
 
+  /**
+    * 添加新的Broker
+    */
   private def addNewBroker(broker: Broker) {
     val messageQueue = new LinkedBlockingQueue[(RequestOrResponse, RequestOrResponse => Unit)](config.controllerMessageQueueSize)
     debug(s"Controller ${config.brokerId} trying to connect to broker ${broker.id}")
@@ -60,6 +75,9 @@ class ControllerChannelManager(controllerContext: ControllerContext, config: Hex
     controllerBrokers.put(broker.id, ControllerBrokerWrapper(channel, broker, messageQueue, requestThread))
   }
 
+  /**
+    * 移除已有的Broker
+    */
   private def removeExistingBroker(brokerId: Int) {
     try {
       controllerBrokers(brokerId).channel.disconnect()
@@ -71,6 +89,10 @@ class ControllerChannelManager(controllerContext: ControllerContext, config: Hex
     }
   }
 
+
+  /**
+    * 启动Request发送线程
+    */
   private def startRequestSendThread(brokerId: Int) {
     val requestThread = controllerBrokers(brokerId).requestSendThread
     if (requestThread.getState == Thread.State.NEW)
@@ -107,16 +129,17 @@ class RequestSendThread(val controllerId: Int,
             receive = channel.receive()
             isSendSuccessful = true
           } catch {
-            case e: Throwable => // if the send was not successful, reconnect to broker and resend the message
+            case e: Throwable => // 如果发送失败，尝试重新连接broker，并再次发送Request
               warn(s"Controller $controllerId epoch ${controllerCtx.epoch} fails to send request ${request.toString} to broker ${toBroker.toString}. " +
                 "Reconnecting to broker.", e)
               channel.disconnect()
               connectToBroker(toBroker, channel)
               isSendSuccessful = false
-              // backoff before retrying the connection and send
+              // 再次连接并发送消息之前sleep一段时间
               swallow(Thread.sleep(300))
           }
         }
+
         var response: RequestOrResponse = null
         request.id match {
           case RequestKeys.LeaderAndIsr =>

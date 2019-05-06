@@ -4,11 +4,11 @@ import hexagon.exceptions.HexagonException
 import hexagon.tools.{Logging, SysTime}
 import hexagon.utils.JSON
 
-object Controller extends Logging {
+object ControllerInfo extends Logging {
 
-  def parse(json: String): Controller = {
+  def parse(json: String): ControllerInfo = {
     try {
-      JSON.fromJson(json, classOf[Controller]) match {
+      JSON.fromJson(json, classOf[ControllerInfo]) match {
         case Some(c) => c
         case None => throw new HexagonException(s"Failed to parse the controller info json [$json]")
       }
@@ -19,4 +19,4 @@ object Controller extends Logging {
 
 }
 
-case class Controller(brokerId: Int, version: Int = 1, timestamp: Long = SysTime.mills)
+case class ControllerInfo(brokerId: Int, version: Int = 1, timestamp: Long = SysTime.mills)

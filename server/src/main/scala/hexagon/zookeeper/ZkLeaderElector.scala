@@ -2,7 +2,7 @@ package hexagon.zookeeper
 
 import java.nio.charset.StandardCharsets
 
-import hexagon.controller.{Controller, ControllerContext}
+import hexagon.controller.{ControllerInfo, ControllerContext}
 import hexagon.tools.Logging
 import hexagon.utils.JSON
 import hexagon.utils.Locks._
@@ -40,11 +40,11 @@ class ZkLeaderElector(leaderPath: String,
       return amILeader()
     }
 
-    val electJson = JSON.toJson(Controller(brokerId))
+    val electJson = JSON.toJson(ControllerInfo(brokerId))
 
     try {
       zkClient.createEphemeralPathExpectConflictHandleZKBug(leaderPath, electJson, brokerId,
-        (controllerString: String, leaderId: Any) => Controller.parse(controllerString).brokerId == leaderId.asInstanceOf[Int],
+        (controllerString: String, leaderId: Any) => ControllerInfo.parse(controllerString).brokerId == leaderId.asInstanceOf[Int],
         controllerContext.zkSessionTimeout
       )
       info(s"$brokerId successfully elected as leader")
@@ -80,7 +80,7 @@ class ZkLeaderElector(leaderPath: String,
 
   private def getControllerId: Int = {
     zkClient.readDataMaybeNull(leaderPath) match {
-      case Some(json) => Controller.parse(json).brokerId
+      case Some(json) => ControllerInfo.parse(json).brokerId
       case None => -1
     }
   }
@@ -111,7 +111,7 @@ class ZkLeaderElector(leaderPath: String,
     def readLeaderId(data: ChildData): Int = {
       val bytes = data.getData
       val controllerInfo = new String(bytes, StandardCharsets.UTF_8)
-      Controller.parse(controllerInfo).brokerId
+      ControllerInfo.parse(controllerInfo).brokerId
     }
   }
 

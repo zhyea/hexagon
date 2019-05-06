@@ -13,18 +13,8 @@ import org.apache.curator.retry.RetryForever
 import org.apache.zookeeper.CreateMode.EPHEMERAL
 import org.apache.zookeeper.KeeperException._
 
-object ZkClient extends Logging {
-
-  val BrokerIdsPath: String = "/brokers/ids"
-
-  val BrokerTopicsPath: String = "/brokers/topics"
-
-}
-
 
 class ZkClient(val config: ZooKeeperConfig) extends Logging {
-
-  import ZkClient._
 
   private val client = CuratorFrameworkFactory.builder()
     .connectString(config.zkConnect)
@@ -198,7 +188,7 @@ class ZkClient(val config: ZooKeeperConfig) extends Logging {
   /**
     * 获取zk中的topic路径
     */
-  def getTopicPath(topic: String): String = BrokerTopicsPath + "/" + topic
+  def getTopicPath(topic: String): String = config.BrokerTopicsPath + "/" + topic
 
 
   /**

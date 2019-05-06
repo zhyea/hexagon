@@ -16,11 +16,17 @@ class ControllerContext(val zkClient: ZkClient,
 
 
   var shuttingDownBrokerIds: mutable.Set[Int] = mutable.Set.empty
-
+  /**
+    * topic->replica映射集合
+    */
   var topicReplicaAssignment: mutable.Map[String, Seq[Int]] = mutable.Map.empty
-
+  /**
+    * topic->leader信息映射
+    */
   var topicLeadershipInfo: mutable.Map[String, LeaderIsrAndControllerEpoch] = mutable.Map.empty
-
+  /**
+    * 正在执行reassign的 topic->newReplicas 映射
+    */
   var topicBeingReassigned: mutable.Map[String, Seq[Int]] = new mutable.HashMap
 
 
