@@ -30,6 +30,12 @@ class ReplicaStateMachine(controllerContext: ControllerContext,
 
     override def onChildUpdate(childData: ChildData): Unit = {
 
+
+      //end on data change
+    }
+
+
+    override def onChildAdded(childData: ChildData): Unit = {
       Locks.inLock(controllerContext.controllerLock) {
         if (null != childData && hasStarted.get()) {
           try {
@@ -42,14 +48,12 @@ class ReplicaStateMachine(controllerContext: ControllerContext,
           }
         }
       }
-      //end on data change
     }
+
+    override def onChildRemoved(data: ChildData): Unit = ???
 
 
     private def getBrokerId(path: String): Int = path.substring(path.lastIndexOf('/')).toInt
-
-
-    //end broker change listener
   }
 
 }

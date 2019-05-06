@@ -47,5 +47,6 @@ class ControllerContext(val zkClient: ZkClient,
 
   def liveOrShuttingDownBrokers: Set[Broker] = liveBrokersUnderlying
 
-
+  def replicaOnBroker(brokerId:Int) =
+    topicReplicaAssignment.filter(e=>e._2.contains(brokerId)).map(new TopicAnd)
 }

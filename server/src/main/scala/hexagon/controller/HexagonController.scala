@@ -55,6 +55,104 @@ class HexagonController(val config: HexagonConfig,
   }
 
 
+  /**
+    * This callback is invoked by the replica state machine's broker change listener, with the list of newly started
+    * brokers as input. It does the following -
+    * 1. Triggers the OnlinePartition state change for all new/offline partitions
+    * 2. It checks whether there are reassigned replicas assigned to any newly started brokers.  If
+    *    so, it performs the reassignment logic for each topic/partition.
+    *
+    * Note that we don't need to refresh the leader/isr cache for all topic/partitions at this point for two reasons:
+    * 1. The partition state machine, when triggering online state change, will refresh leader and ISR for only those
+    *    partitions currently new or offline (rather than every partition this controller is aware of)
+    * 2. Even if we do refresh the cache, there is no guarantee that by the time the leader and ISR request reaches
+    *    every broker that it is still valid.  Brokers check the leader epoch to determine validity of the request.
+    */
+  def onBrokerStartup(newBrokerId: Int) {
+    info(s"New broker startup callback for $newBrokerId")
+    val newBrokersSet = newBrokers.toSet
+    // send update metadata request for all partitions to the newly restarted brokers. In cases of controlled shutdown
+    // leaders will not be elected when a new broker comes up. So at least in the common controlled shutdown case, the
+    // metadata will reach the new brokers faster
+    sendUpdateMetadataRequest(newBrokers)
+    // the very first thing to do when a new broker comes up is send it the entire list of partitions that it is
+    // supposed to host. Based on that the broker starts the high watermark threads for the input list of partitions
+    val allReplicasOnNewBrokers = controllerContext.replicasOnBrokers(newBrokersSet)
+    replicaStateMachine.handleStateChanges(allReplicasOnNewBrokers, OnlineReplica)
+    // when a new broker comes up, the controller needs to trigger leader election for all new and offline partitions
+    // to see if these brokers can become leaders for some/all of those
+    partitionStateMachine.triggerOnlinePartitionStateChange()
+    // check if reassignment of some partitions need to be restarted
+    val partitionsWithReplicasOnNewBrokers = controllerContext.partitionsBeingReassigned.filter {
+      case (topicAndPartition, reassignmentContext) => reassignmentContext.newReplicas.exists(newBrokersSet.contains(_))
+    }
+    partitionsWithReplicasOnNewBrokers.foreach(p => onPartitionReassignment(p._1, p._2))
+    // check if topic deletion needs to be resumed. If at least one replica that belongs to the topic being deleted exists
+    // on the newly restarted brokers, there is a chance that topic deletion can resume
+    val replicasForTopicsToBeDeleted = allReplicasOnNewBrokers.filter(p => deleteTopicManager.isTopicQueuedUpForDeletion(p.topic))
+    if(replicasForTopicsToBeDeleted.size > 0) {
+      info(("Some replicas %s for topics scheduled for deletion %s are on the newly restarted brokers %s. " +
+        "Signaling restart of topic deletion for these topics").format(replicasForTopicsToBeDeleted.mkString(","),
+        deleteTopicManager.topicsToBeDeleted.mkString(","), newBrokers.mkString(",")))
+      deleteTopicManager.resumeDeletionForTopics(replicasForTopicsToBeDeleted.map(_.topic))
+    }
+  }
+
+  /**
+    * This callback is invoked by the replica state machine's broker change listener with the list of failed brokers
+    * as input. It does the following -
+    * 1. Mark partitions with dead leaders as offline
+    * 2. Triggers the OnlinePartition state change for all new/offline partitions
+    * 3. Invokes the OfflineReplica state change on the input list of newly started brokers
+    *
+    * Note that we don't need to refresh the leader/isr cache for all topic/partitions at this point.  This is because
+    * the partition state machine will refresh our cache for us when performing leader election for all new/offline
+    * partitions coming online.
+    */
+  def onBrokerFailure(deadBrokers: Seq[Int]) {
+    info("Broker failure callback for %s".format(deadBrokers.mkString(",")))
+    val deadBrokersThatWereShuttingDown =
+      deadBrokers.filter(id => controllerContext.shuttingDownBrokerIds.remove(id))
+    info("Removed %s from list of shutting down brokers.".format(deadBrokersThatWereShuttingDown))
+    val deadBrokersSet = deadBrokers.toSet
+    // trigger OfflinePartition state for all partitions whose current leader is one amongst the dead brokers
+    val partitionsWithoutLeader = controllerContext.partitionLeadershipInfo.filter(partitionAndLeader =>
+      deadBrokersSet.contains(partitionAndLeader._2.leaderAndIsr.leader) &&
+        !deleteTopicManager.isTopicQueuedUpForDeletion(partitionAndLeader._1.topic)).keySet
+    partitionStateMachine.handleStateChanges(partitionsWithoutLeader, OfflinePartition)
+    // trigger OnlinePartition state changes for offline or new partitions
+    partitionStateMachine.triggerOnlinePartitionStateChange()
+    // filter out the replicas that belong to topics that are being deleted
+    var allReplicasOnDeadBrokers = controllerContext.replicasOnBrokers(deadBrokersSet)
+    val activeReplicasOnDeadBrokers = allReplicasOnDeadBrokers.filterNot(p => deleteTopicManager.isTopicQueuedUpForDeletion(p.topic))
+    // handle dead replicas
+    replicaStateMachine.handleStateChanges(activeReplicasOnDeadBrokers, OfflineReplica)
+    // check if topic deletion state for the dead replicas needs to be updated
+    val replicasForTopicsToBeDeleted = allReplicasOnDeadBrokers.filter(p => deleteTopicManager.isTopicQueuedUpForDeletion(p.topic))
+    if(replicasForTopicsToBeDeleted.size > 0) {
+      // it is required to mark the respective replicas in TopicDeletionFailed state since the replica cannot be
+      // deleted when the broker is down. This will prevent the replica from being in TopicDeletionStarted state indefinitely
+      // since topic deletion cannot be retried until at least one replica is in TopicDeletionStarted state
+      deleteTopicManager.failReplicaDeletion(replicasForTopicsToBeDeleted)
+    }
+  }
+
+  /**
+    * This callback is invoked by the partition state machine's topic change listener with the list of new topics
+    * and partitions as input. It does the following -
+    * 1. Registers partition change listener. This is not required until KAFKA-347
+    * 2. Invokes the new partition callback
+    * 3. Send metadata request with the new topic to all brokers so they allow requests for that topic to be served
+    */
+  def onNewTopicCreation(topics: Set[String], newPartitions: Set[TopicAndPartition]) {
+    info("New topic creation callback for %s".format(newPartitions.mkString(",")))
+    // subscribe to partition changes
+    topics.foreach(topic => partitionStateMachine.registerPartitionChangeListener(topic))
+    onNewPartitionCreation(newPartitions)
+  }
+
+
+
   def onPartitionReassignment(topic: String, reassignedReplicas: Seq[Int]) {
     areReplicasInIsr(topic, reassignedReplicas) match {
       case false =>
@@ -204,7 +302,7 @@ class HexagonController(val config: HexagonConfig,
     * metadata requests
     * @param brokers The brokers that the update metadata request should be sent to
     */
-  def sendUpdateMetadataRequest(brokers: Seq[Int], partitions: Set[TopicAndPartition] = Set.empty[TopicAndPartition]) {
+  def sendUpdateMetadataRequest(broker: Int) {
     brokerRequestBatch.newBatch()
     brokerRequestBatch.addUpdateMetadataRequestForBrokers(brokers, partitions)
     brokerRequestBatch.sendRequestsToBrokers(epoch, controllerContext.correlationId.getAndIncrement)

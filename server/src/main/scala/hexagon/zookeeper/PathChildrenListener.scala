@@ -21,10 +21,10 @@ abstract class PathChildrenListener(val cache: PathChildrenCache) extends PathCh
     }
   }
 
-  def onChildUpdate(data: ChildData): Unit
+  def onChildUpdate(childData: ChildData): Unit
 
-  def onChildAdded(data: ChildData): Unit
+  def onChildAdded(childData: ChildData): Unit
 
-  def onChildRemoved(data: ChildData): Unit
+  def onChildRemoved(childData: ChildData): Unit
 
 }
