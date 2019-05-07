@@ -9,9 +9,13 @@ object LeaderAndIsr {
   val LeaderDuringDelete: Int = -2
 }
 
-case class LeaderAndIsr(var leader: Int, var leaderEpoch: Int, var isr: List[Int], var zkVersion: Int) {
+case class LeaderAndIsr(var leader: Int,
+                        var leaderEpoch: Int,
+                        var isr: List[Int],
+                        var zkVersion: Int) {
 
-  def this(leader: Int, isr: List[Int]) = this(leader, LeaderAndIsr.initialLeaderEpoch, isr, LeaderAndIsr.initialZKVersion)
+  def this(leader: Int,
+           isr: List[Int]) = this(leader, LeaderAndIsr.initialLeaderEpoch, isr, LeaderAndIsr.initialZKVersion)
 
   override def toString: String = {
     JSON.toJson(Map("leader" -> leader, "leader_epoch" -> leaderEpoch, "isr" -> isr))

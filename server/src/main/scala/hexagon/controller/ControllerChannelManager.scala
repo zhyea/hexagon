@@ -42,6 +42,9 @@ class ControllerChannelManager(controllerContext: ControllerContext, config: Hex
   }
 
 
+  /**
+    * 添加Broker
+    */
   def addBroker(broker: Broker): Unit = {
     brokerLock synchronized {
       if (!controllerBrokers.contains(broker.id)) {

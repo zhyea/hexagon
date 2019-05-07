@@ -2,7 +2,9 @@ package hexagon.controller
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import hexagon.cluster.LeaderAndIsr
 import hexagon.config.HexagonConfig
+import hexagon.tools.Loggers.StateChangeLogger
 import hexagon.tools.Logging
 import hexagon.utils.Locks._
 import hexagon.zookeeper.{LeaderElectListener, ZkClient, ZkLeaderElector}
@@ -16,7 +18,6 @@ object HexagonController extends Logging {
 
   val stateChangeLogger: StateChangeLogger = StateChangeLogger("state.change")
 
-  case class StateChangeLogger(name: String) extends Logging
 
 
 }
@@ -60,13 +61,13 @@ class HexagonController(val config: HexagonConfig,
     * brokers as input. It does the following -
     * 1. Triggers the OnlinePartition state change for all new/offline partitions
     * 2. It checks whether there are reassigned replicas assigned to any newly started brokers.  If
-    *    so, it performs the reassignment logic for each topic/partition.
+    * so, it performs the reassignment logic for each topic/partition.
     *
     * Note that we don't need to refresh the leader/isr cache for all topic/partitions at this point for two reasons:
     * 1. The partition state machine, when triggering online state change, will refresh leader and ISR for only those
-    *    partitions currently new or offline (rather than every partition this controller is aware of)
+    * partitions currently new or offline (rather than every partition this controller is aware of)
     * 2. Even if we do refresh the cache, there is no guarantee that by the time the leader and ISR request reaches
-    *    every broker that it is still valid.  Brokers check the leader epoch to determine validity of the request.
+    * every broker that it is still valid.  Brokers check the leader epoch to determine validity of the request.
     */
   def onBrokerStartup(newBrokerId: Int) {
     info(s"New broker startup callback for $newBrokerId")
@@ -90,7 +91,7 @@ class HexagonController(val config: HexagonConfig,
     // check if topic deletion needs to be resumed. If at least one replica that belongs to the topic being deleted exists
     // on the newly restarted brokers, there is a chance that topic deletion can resume
     val replicasForTopicsToBeDeleted = allReplicasOnNewBrokers.filter(p => deleteTopicManager.isTopicQueuedUpForDeletion(p.topic))
-    if(replicasForTopicsToBeDeleted.size > 0) {
+    if (replicasForTopicsToBeDeleted.size > 0) {
       info(("Some replicas %s for topics scheduled for deletion %s are on the newly restarted brokers %s. " +
         "Signaling restart of topic deletion for these topics").format(replicasForTopicsToBeDeleted.mkString(","),
         deleteTopicManager.topicsToBeDeleted.mkString(","), newBrokers.mkString(",")))
@@ -129,7 +130,7 @@ class HexagonController(val config: HexagonConfig,
     replicaStateMachine.handleStateChanges(activeReplicasOnDeadBrokers, OfflineReplica)
     // check if topic deletion state for the dead replicas needs to be updated
     val replicasForTopicsToBeDeleted = allReplicasOnDeadBrokers.filter(p => deleteTopicManager.isTopicQueuedUpForDeletion(p.topic))
-    if(replicasForTopicsToBeDeleted.size > 0) {
+    if (replicasForTopicsToBeDeleted.size > 0) {
       // it is required to mark the respective replicas in TopicDeletionFailed state since the replica cannot be
       // deleted when the broker is down. This will prevent the replica from being in TopicDeletionStarted state indefinitely
       // since topic deletion cannot be retried until at least one replica is in TopicDeletionStarted state
@@ -152,13 +153,12 @@ class HexagonController(val config: HexagonConfig,
   }
 
 
-
   def onPartitionReassignment(topic: String, reassignedReplicas: Seq[Int]) {
     areReplicasInIsr(topic, reassignedReplicas) match {
       case false =>
         info(s"New replicas ${reassignedReplicas.mkString(",")} for topic $topic being reassigned not yet caught up with the leader")
         val newReplicasNotInOldReplicaList = reassignedReplicas.toSet -- controllerContext.topicReplicaAssignment(topic).toSet
-        val newAndOldReplicas = (reassignedReplicas  ++ controllerContext.topicReplicaAssignment(topic)).toSet
+        val newAndOldReplicas = (reassignedReplicas ++ controllerContext.topicReplicaAssignment(topic)).toSet
         //1. Update AR in ZK with OAR + RAR.
         updateAssignedReplicasForTopic(topic, newAndOldReplicas.toSeq)
         //2. Send LeaderAndIsr request to every replica in OAR + RAR (with AR as OAR + RAR).
@@ -197,9 +197,8 @@ class HexagonController(val config: HexagonConfig,
   }
 
 
-
   private def updateAssignedReplicasForTopic(topic: String,
-                                                 replicas: Seq[Int]) {
+                                             replicas: Seq[Int]) {
     val partitionsAndReplicasForThisTopic = controllerContext.partitionReplicaAssignment.filter(_._1.topic.equals(topic.topic))
     partitionsAndReplicasForThisTopic.put(topic, replicas)
     updateAssignedReplicasForTopic(topic, partitionsAndReplicasForThisTopic)
@@ -236,7 +235,6 @@ class HexagonController(val config: HexagonConfig,
   }
 
 
-
   private def moveReassignedPartitionLeaderIfRequired(topicAndPartition: TopicAndPartition,
                                                       reassignedPartitionContext: ReassignedPartitionsContext) {
     val reassignedReplicas = reassignedPartitionContext.newReplicas
@@ -245,7 +243,7 @@ class HexagonController(val config: HexagonConfig,
     // request to the current or new leader. This will prevent it from adding the old replicas to the ISR
     val oldAndNewReplicas = controllerContext.partitionReplicaAssignment(topicAndPartition)
     controllerContext.partitionReplicaAssignment.put(topicAndPartition, reassignedReplicas)
-    if(!reassignedPartitionContext.newReplicas.contains(currentLeader)) {
+    if (!reassignedPartitionContext.newReplicas.contains(currentLeader)) {
       info("Leader %s for partition %s being reassigned, ".format(currentLeader, topicAndPartition) +
         "is not in the new list of replicas %s. Re-electing leader".format(reassignedReplicas.mkString(",")))
       // move the leader to one of the alive and caught up new replicas
@@ -282,7 +280,7 @@ class HexagonController(val config: HexagonConfig,
   }
 
   def removePartitionFromReassignedPartitions(topicAndPartition: TopicAndPartition) {
-    if(controllerContext.partitionsBeingReassigned.get(topicAndPartition).isDefined) {
+    if (controllerContext.partitionsBeingReassigned.get(topicAndPartition).isDefined) {
       // stop watching the ISR changes for this partition
       zkClient.unsubscribeDataChanges(ZkUtils.getTopicPartitionLeaderAndIsrPath(topicAndPartition.topic, topicAndPartition.partition),
         controllerContext.partitionsBeingReassigned(topicAndPartition).isrChangeListener)
@@ -300,6 +298,7 @@ class HexagonController(val config: HexagonConfig,
   /**
     * Send the leader information for selected partitions to selected brokers so that they can correctly respond to
     * metadata requests
+    *
     * @param brokers The brokers that the update metadata request should be sent to
     */
   def sendUpdateMetadataRequest(broker: Int) {
@@ -333,3 +332,18 @@ class HexagonController(val config: HexagonConfig,
   }
 
 }
+
+
+case class LeaderIsrAndControllerEpoch(leaderAndIsr: LeaderAndIsr,
+                                       controllerEpoch: Int) {
+  override def toString: String = {
+    val leaderAndIsrInfo = new StringBuilder
+    leaderAndIsrInfo.append("(Leader:" + leaderAndIsr.leader)
+    leaderAndIsrInfo.append(",ISR:" + leaderAndIsr.isr.mkString(","))
+    leaderAndIsrInfo.append(",LeaderEpoch:" + leaderAndIsr.leaderEpoch)
+    leaderAndIsrInfo.append(",ControllerEpoch:" + controllerEpoch + ")")
+    leaderAndIsrInfo.toString()
+  }
+
+}
+
