@@ -10,21 +10,28 @@ import hexagon.utils.IOUtils._
 object PutRequest {
 
   def readFrom(buffer: ByteBuffer): PutRequest = {
+    val correlationId = buffer.getInt
     val topic = readShortString(buffer)
     val msg = readShortString(buffer)
-    PutRequest(topic, msg)
+    PutRequest(correlationId, topic, msg)
   }
 
 }
 
 
-case class PutRequest(topic: String,
-                      msg: String) extends RequestOrResponse(RequestKeys.Put) {
+case class PutRequest(correlationId: Int, // 交互ID
+                      topic: String, // topic
+                      msg: String // 消息内容
+                     ) extends RequestOrResponse(RequestKeys.Put) {
 
   /**
     * topicLength + topic + msgLength + msg
     */
-  override def sizeInBytes: Int = BYTES.Short + topic.length + BYTES.Short + msg.length
+  override def sizeInBytes: Int =
+    BYTES.Int +
+      BYTES.Short + topic.length +
+      BYTES.Short +
+      msg.length
 
   override def writeTo(buffer: ByteBuffer): Unit = {
     writeShortString(buffer, topic)

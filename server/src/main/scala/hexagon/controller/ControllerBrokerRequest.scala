@@ -33,13 +33,15 @@ class ControllerBrokerRequest(controllerContext: ControllerContext,
 
   def addUpdateMetadataRequestForBrokers(brokerIds: Seq[Int],
                                          topics: collection.Set[String] = Set.empty[String],
+                                         deleteTopicManager: TopicDeletionManager,
                                          callback: RequestOrResponse => Unit = null) {
+
     def updateMetadataRequestMapFor(topic: String, beingDeleted: Boolean) {
       val leaderIsrAndControllerEpochOpt = controllerContext.topicLeadershipInfo.get(topic)
       leaderIsrAndControllerEpochOpt match {
         case Some(leaderIsrAndControllerEpoch) =>
           val replicas = controllerContext.topicReplicaAssignment(topic).toSet
-          val partitionStateInfo = if (beingDeleted) {
+          val topicStateInfo = if (beingDeleted) {
             val leaderAndIsr = new LeaderAndIsr(LeaderAndIsr.LeaderDuringDelete, leaderIsrAndControllerEpoch.leaderAndIsr.isr)
             TopicStateInfo(leaderAndIsr, leaderIsrAndControllerEpoch.controllerEpoch, replicas)
           } else {
@@ -47,10 +49,10 @@ class ControllerBrokerRequest(controllerContext: ControllerContext,
           }
           brokerIds.filter(b => b >= 0).foreach { brokerId =>
             updateMetadataRequestMap.getOrElseUpdate(brokerId, new mutable.HashMap[String, TopicStateInfo])
-            updateMetadataRequestMap(brokerId).put(topic, partitionStateInfo)
+            updateMetadataRequestMap(brokerId).put(topic, topicStateInfo)
           }
         case None =>
-          info("Leader not yet assigned for partition %s. Skip sending UpdateMetadataRequest.".format(topic))
+          info(s"Leader not yet assigned for topic $topic. Skip sending UpdateMetadataRequest.")
       }
     }
 
@@ -59,13 +61,13 @@ class ControllerBrokerRequest(controllerContext: ControllerContext,
         controllerContext.topicLeadershipInfo.keySet
       else
         topics
-      if (controller.deleteTopicManager.partitionsToBeDeleted.isEmpty)
+      if (deleteTopicManager.partitionsToBeDeleted.isEmpty)
         givenPartitions
       else
-        givenPartitions -- controller.deleteTopicManager.partitionsToBeDeleted
+        givenPartitions -- deleteTopicManager.partitionsToBeDeleted
     }
     filteredPartitions.foreach(partition => updateMetadataRequestMapFor(partition, beingDeleted = false))
-    controller.deleteTopicManager.partitionsToBeDeleted.foreach(partition => updateMetadataRequestMapFor(partition, beingDeleted = true))
+    deleteTopicManager.partitionsToBeDeleted.foreach(partition => updateMetadataRequestMapFor(partition, beingDeleted = true))
   }
 
 

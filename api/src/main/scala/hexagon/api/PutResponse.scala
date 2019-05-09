@@ -14,20 +14,24 @@ object PutResponse {
     if (requestId != RequestKeys.Put) {
       throw new InvalidResponseException(s"Response id is invalid, expected id:${RequestKeys.Put}, actual:$requestId")
     }
+    val correlationId = buffer.getInt
     val topic = readShortString(buffer)
     val result = buffer.get == 1
 
-    PutResponse(topic, result)
+    PutResponse(correlationId, topic, result)
   }
 
 }
 
 
-case class PutResponse(topic: String, result: Boolean) extends RequestOrResponse(RequestKeys.Put) {
+case class PutResponse(correlationId: Int,
+                       topic: String,
+                       result: Boolean) extends RequestOrResponse(RequestKeys.Put) {
 
   override def sizeInBytes: Int = shortStringLength(topic) + BYTES.Byte
 
   override def writeTo(buffer: ByteBuffer): Unit = {
+    buffer.putInt(correlationId)
     writeShortString(buffer, topic)
     buffer.put((if (result) 1 else 0).toByte)
   }
