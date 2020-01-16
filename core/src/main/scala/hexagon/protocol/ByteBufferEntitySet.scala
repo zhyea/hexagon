@@ -119,7 +119,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
       } else {
         newEntity.compressionCodec match {
           case NoCompressionCodec =>
-            innerItr = _
+            innerItr = null
             debug(s"Entity is uncompressed. Valid byte count = $currValidBytes")
             currValidBytes += 4 + size
             trace(s"currValidBytes = $currValidBytes")
@@ -129,7 +129,7 @@ class ByteBufferEntitySet(private val buffer: ByteBuffer,
             innerItr = CompressionUtils.decompress(newEntity).internalIterator()
             if (!innerItr.hasNext) {
               currValidBytes += 4 + lastEntitySize
-              innerItr = _
+              innerItr = null
             }
             makeNext()
         }

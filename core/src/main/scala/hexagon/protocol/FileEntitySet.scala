@@ -24,7 +24,7 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
 
     if (needRecover.get) {
       // set the file position to the end of the file for appending messages
-      val start = SysTime.mills
+      val start = SysTime.milli
       val truncated = recover()
       info(s"Recovery succeeded in  ${SysTime.elapsed(start) / 1000} seconds. $truncated bytes truncated.")
     } else {
@@ -153,9 +153,9 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
   }
 
 
-
-
   override def iterator: Iterator[EntityAndOffset] = ???
 
   override def sizeInBytes: Long = setSize.get()
+
+  override def canEqual(other: Any): Boolean = ???
 }

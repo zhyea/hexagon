@@ -10,7 +10,7 @@ class PutRequestHandler extends Handler {
   override def name: String = "PutRequest"
 
   override def handle(receive: Receive): Option[Send] = {
-    val start = SysTime.mills
+    val start = SysTime.milli
     val request = PutRequest.readFrom(receive.buffer)
 
     if (logger.isTraceEnabled())

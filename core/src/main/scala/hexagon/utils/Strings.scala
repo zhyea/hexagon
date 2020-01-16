@@ -1,6 +1,6 @@
 package hexagon.utils
 
-object StringUtils {
+object Strings {
 
 
   def isBlank(source: String): Boolean = {

@@ -98,7 +98,7 @@ object CompressionUtils extends Logging {
 
     val intermediateBuffer = new Array[Byte](1024)
     try {
-      Stream.continually(cf.read(intermediateBuffer))
+      LazyList.continually(cf.read(intermediateBuffer))
         .takeWhile(_ > 0)
         .foreach {
           output.write(intermediateBuffer, 0, _)

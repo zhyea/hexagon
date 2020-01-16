@@ -2,6 +2,7 @@ package hexagon.log
 
 import java.io.{File, IOException}
 import java.text.NumberFormat
+import java.util
 import java.util.{ArrayList, Collections, Comparator}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong}
 
@@ -33,12 +34,12 @@ private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val max
 
   private val unflushed = new AtomicInteger(0)
 
-  private val lastFlushedTime = new AtomicLong(SysTime.mills)
+  private val lastFlushedTime = new AtomicLong(SysTime.milli)
 
-  private[log] val segments: SegmentList[LogSegment] = loadSegments()
+  private[log] val segments: SegmentList = loadSegments()
 
 
-  private def loadSegments(): SegmentList[LogSegment] = {
+  private def loadSegments(): SegmentList = {
     val accum: ArrayList[LogSegment] = new ArrayList[LogSegment]
     val ls = dir.listFiles()
     if (ls != null) {
@@ -76,7 +77,7 @@ private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val max
   }
 
 
-  private def validateSegments(segments: ArrayList[LogSegment]) {
+  private def validateSegments(segments: util.ArrayList[LogSegment]): Unit = {
     lock synchronized {
       for (i <- 0 until segments.size - 1) {
         val curr = segments.get(i)
@@ -91,15 +92,12 @@ private[log] class Log(val dir: File, val time: Long, val maxSize: Long, val max
   def numberOfSegments: Int = segments.view.length
 
 
-  def close() {
+  def close(): Unit = {
     lock synchronized {
       for (seg <- segments.view)
         seg.entitySet.close()
     }
   }
-
-
-
 
 
 }

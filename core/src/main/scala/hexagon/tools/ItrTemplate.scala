@@ -48,7 +48,7 @@ abstract class ItrTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
     null.asInstanceOf[T]
   }
 
-  protected def resetState() {
+  protected def resetState(): Unit = {
     state = NOT_READY
   }
 

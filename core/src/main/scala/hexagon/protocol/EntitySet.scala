@@ -51,6 +51,9 @@ abstract class EntitySet extends Iterable[EntityAndOffset] with Logging {
   def sizeInBytes: Long
 
 
+  def canEqual(other: Any): Boolean
+
+
   def validate(): Unit = {
     for (entityAndOffset <- this)
       if (!entityAndOffset.entity.isValid)
