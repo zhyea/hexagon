@@ -14,7 +14,7 @@ subprojects {
     targetCompatibility = 1.8
 
     ext {
-        scalaVersion = '2.12.4'
+        scalaVersion = '2.13.1'
     }
 
     dependencies {
