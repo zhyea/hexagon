@@ -9,39 +9,38 @@ import hexagon.tools.Logging
 
 class HexagonServer(val config: HexagonConfig) extends Logging {
 
-  private val isRunning: AtomicBoolean = new AtomicBoolean(false)
-  private val shutdownLatch: CountDownLatch = new CountDownLatch(1)
+	private val isRunning: AtomicBoolean = new AtomicBoolean(false)
+	private val shutdownLatch: CountDownLatch = new CountDownLatch(1)
 
-  private var socketServer: SocketServer = _
+	private var socketServer: SocketServer = _
 
-  def startup(): Unit = {
-    info("Hexagon server is starting.")
-    isRunning.set(true)
+	def startup(): Unit = {
+		info("Hexagon server is starting.")
+		isRunning.set(true)
 
-    socketServer = new SocketServer(config.host,
-      config.port,
-      config.numNetworkThreads,
-      config.socketSendBuffer,
-      config.socketReceiveBuffer,
-      config.maxMessageSize)
+		socketServer = new SocketServer(config.host,
+			config.port,
+			config.numNetworkThreads,
+			config.socketSendBuffer,
+			config.socketReceiveBuffer,
+			config.maxMessageSize)
 
-    socketServer.startup()
+		socketServer.startup()
 
-    info("Hexagon server started")
-  }
+		info("Hexagon server started")
+	}
 
 
-  def awaitShutdown(): Unit = shutdownLatch.await()
+	def awaitShutdown(): Unit = shutdownLatch.await()
 
-  def shutdown(): Unit = {
-    val canShutdown = isRunning.compareAndSet(true, false)
-    if (canShutdown) {
-      info("Shutting down hexagon server.")
-      if (null != socketServer) socketServer.shutdown()
-      shutdownLatch.countDown()
-      info("Shutdown hexagon server completely.")
-    }
-
-  }
+	def shutdown(): Unit = {
+		val canShutdown = isRunning.compareAndSet(true, false)
+		if (canShutdown) {
+			info("Shutting down hexagon server.")
+			if (null != socketServer) socketServer.shutdown()
+			shutdownLatch.countDown()
+			info("Shutdown hexagon server completely.")
+		}
+	}
 
 }

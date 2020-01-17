@@ -5,6 +5,10 @@ import java.util.concurrent.{ScheduledThreadPoolExecutor, ThreadFactory, TimeUni
 
 import hexagon.utils.Threads
 
+
+/**
+  * 定时任务管理工具
+  */
 class HexagonScheduler(val numThreads: Int,
                        val baseThreadName: String,
                        isDaemon: Boolean) extends Logging {
