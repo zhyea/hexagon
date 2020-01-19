@@ -45,7 +45,7 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 			}
 		}
 		debug("Closing selector..")
-		swallow(selector.close)
+		swallowWarn(selector.close)
 		shutdownComplete()
 	}
 
@@ -109,8 +109,8 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 	  */
 	def close(key: SelectionKey): Unit = {
 		val channel = key.channel().asInstanceOf[SocketChannel]
-		swallow(channel.socket().close())
-		swallow(channel.close())
+		swallowWarn(channel.socket().close())
+		swallowWarn(channel.close())
 		key.attach(null)
 		key.cancel()
 	}

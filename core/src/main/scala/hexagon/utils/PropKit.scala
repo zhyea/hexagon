@@ -18,6 +18,7 @@ object PropKit {
 		}
 	}
 
+
 	def getString(props: Properties, key: String, defaultValue: String = null): String = {
 		if (props.containsKey(key))
 			props.getProperty(key)
@@ -34,4 +35,10 @@ object PropKit {
 	}
 
 
+	def getLong(props: Properties, key: String, defaultValue: Long = 0L): Long = {
+		if (props.containsKey(key))
+			props.getProperty(key).toLong
+		else
+			defaultValue
+	}
 }

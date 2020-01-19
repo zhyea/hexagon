@@ -90,7 +90,7 @@ class ByteBufferMessageSet(private val buffer: ByteBuffer,
 						s"""
 						   |Invalid message size: $size, only received bytes: ${itrBuffer.remaining()} at $currValidBytes.
 						   |Possible causes: (1) a single message larger than the fetch size; (2) log corruption.
-             """.stripMargin
+             			""".stripMargin
 					)
 				}
 				return done()
@@ -100,15 +100,15 @@ class ByteBufferMessageSet(private val buffer: ByteBuffer,
 			buffer.limit(size)
 			itrBuffer.position(itrBuffer.position() + size)
 
-			val newEntity = new Message(buffer)
-			if (!newEntity.isValid) {
+			val newMsg = new Message(buffer)
+			if (!newMsg.isValid) {
 				throw new InvalidMessageException(s"Message is invalid, compression codec: size: $size, curr offset: $currValidBytes, init offset:$initOffset. ")
 			}
 
 			debug(s"Valid byte count = $currValidBytes")
 			currValidBytes += 4 + size
 			trace(s"currValidBytes = $currValidBytes")
-			MessageAndOffset(newEntity, currValidBytes)
+			MessageAndOffset(newMsg, currValidBytes)
 		}
 	}
 

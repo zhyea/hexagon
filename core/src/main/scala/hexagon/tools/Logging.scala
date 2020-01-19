@@ -32,7 +32,15 @@ trait Logging {
 			logger.error(format, args)
 	}
 
-	def swallow(action: => Unit, message: String = null): Unit = {
+	def swallowWarn(action: => Unit, message: String = null): Unit = {
+		try {
+			action
+		} catch {
+			case e: Exception => warn(if (null == message) e.getMessage else message, e)
+		}
+	}
+
+	def swallowError(action: => Unit, message: String = null): Unit = {
 		try {
 			action
 		} catch {
