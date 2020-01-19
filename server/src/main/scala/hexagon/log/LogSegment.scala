@@ -2,10 +2,10 @@ package hexagon.log
 
 import java.io.File
 
-import hexagon.protocol.{ByteBufferEntitySet, FileEntitySet}
+import hexagon.protocol.{ByteBufferMessageSet, FileMessageSet}
 
 
-private[log] class LogSegment(val file: File, val time: Long, val entitySet: FileEntitySet, val start: Long) {
+private[log] class LogSegment(val file: File, val time: Long, val entitySet: FileMessageSet, val start: Long) {
 
 	var firstAppendTime: Option[Long] = None
 
@@ -16,7 +16,7 @@ private[log] class LogSegment(val file: File, val time: Long, val entitySet: Fil
 			firstAppendTime = Some(time)
 	}
 
-	def append(entities: ByteBufferEntitySet): Unit = {
+	def append(entities: ByteBufferMessageSet): Unit = {
 		if (entities.sizeInBytes > 0) {
 			entitySet.append(entities)
 			updateFirstAppendTime()

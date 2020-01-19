@@ -29,6 +29,14 @@ object NumberUtils {
 	}
 
 
+	/**
+	  * 执行crc32运算
+	  *
+	  * @param bytes  目标数组
+	  * @param offset 起始offset
+	  * @param size   要计算的长度
+	  * @return 计算结果
+	  */
 	def crc32(bytes: Array[Byte], offset: Int, size: Int): Long = {
 		val crc = new CRC32()
 		crc.update(bytes, offset, size)

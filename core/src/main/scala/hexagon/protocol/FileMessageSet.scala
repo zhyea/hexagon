@@ -7,19 +7,19 @@ import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 
 import hexagon.utils.{IOUtils, SysTime}
 
-class FileEntitySet(private[protocol] val channel: FileChannel,
-                    private[protocol] val offset: Long,
-                    private[protocol] val limit: Long,
-                    val mutable: Boolean = false,
-                    val needRecover: AtomicBoolean = new AtomicBoolean(false)
-                   ) extends EntitySet {
+class FileMessageSet(private[protocol] val channel: FileChannel,
+					 private[protocol] val offset: Long,
+					 private[protocol] val limit: Long,
+					 val mutable: Boolean = false,
+					 val needRecover: AtomicBoolean = new AtomicBoolean(false)
+				   ) extends MessageSet {
 
 	private val setSize = new AtomicLong()
 	private val setHighWaterMark = new AtomicLong()
 
 	if (mutable) {
 		if (limit < Long.MaxValue || offset > 0)
-			throw new IllegalArgumentException("Attempt to open a mutable entity set with a view or offset, which is not allowed.")
+			throw new IllegalArgumentException("Attempt to open a mutable message set with a view or offset, which is not allowed.")
 
 		if (needRecover.get) {
 			// set the file position to the end of the file for appending messages
@@ -81,7 +81,7 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
 
 	def checkMutable(): Unit = {
 		if (!mutable)
-			throw new IllegalStateException("Attempt to invoke mutation on immutable entity set.")
+			throw new IllegalStateException("Attempt to invoke mutation on immutable message set.")
 	}
 
 
@@ -93,7 +93,7 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
 
 		// check that we have sufficient bytes left in the file
 		val size = buffer.getInt(0)
-		if (size < Entity.headerSize())
+		if (size < Message.HeaderSize)
 			return -1
 
 		val next = start + 4 + size
@@ -111,15 +111,15 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
 				curr += read
 		}
 		entityBuffer.rewind()
-		val message = new Entity(entityBuffer)
+		val message = new Message(entityBuffer)
 		if (!message.isValid)
 			-1
 		else
 			next
 	}
 
-	def read(readOffset: Long, size: Long): EntitySet = {
-		new FileEntitySet(channel, this.offset + readOffset, scala.math.min(this.offset + readOffset + size, highWaterMark),
+	def read(readOffset: Long, size: Long): MessageSet = {
+		new FileMessageSet(channel, this.offset + readOffset, scala.math.min(this.offset + readOffset + size, highWaterMark),
 			false, new AtomicBoolean(false))
 	}
 
@@ -128,16 +128,16 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
 	}
 
 
-	def append(entities: EntitySet): Unit = {
+	def append(messages: MessageSet): Unit = {
 		checkMutable()
 		var written = 0L
-		while (written < entities.sizeInBytes)
-			written += entities.writeTo(channel, 0, entities.sizeInBytes)
+		while (written < messages.sizeInBytes)
+			written += messages.writeTo(channel, 0, messages.sizeInBytes)
 		setSize.getAndAdd(written)
 	}
 
 
-	def flush() = {
+	def flush(): Unit = {
 		checkMutable()
 		channel.force(true)
 		setHighWaterMark.set(sizeInBytes)
@@ -145,14 +145,14 @@ class FileEntitySet(private[protocol] val channel: FileChannel,
 	}
 
 
-	def close() = {
+	def close(): Unit = {
 		if (mutable)
 			flush()
 		channel.close()
 	}
 
 
-	override def iterator: Iterator[EntityAndOffset] = ???
+	override def iterator: Iterator[MessageAndOffset] = ???
 
 	override def sizeInBytes: Long = setSize.get()
 

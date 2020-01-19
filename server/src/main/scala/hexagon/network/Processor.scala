@@ -49,6 +49,8 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 		shutdownComplete()
 	}
 
+
+	// 读取连接内容
 	def read(key: SelectionKey): Unit = {
 
 		var request: Receive = null
@@ -69,7 +71,7 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 			val response = handle(key, request)
 			key.attach(null)
 			if (response.isDefined) {
-				key.attach(response.orNull)
+				key.attach(response.get)
 				key.interestOps(SelectionKey.OP_WRITE)
 			}
 		} else {
@@ -85,6 +87,9 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 	}
 
 
+	/**
+	  * 将响应信息写入Channel
+	  */
 	def write(key: SelectionKey): Unit = {
 		val sc = key.channel().asInstanceOf[SocketChannel]
 		val response = key.attachment().asInstanceOf[Send]
@@ -99,6 +104,9 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 	}
 
 
+	/**
+	  * 连接不可用时，将之移除
+	  */
 	def close(key: SelectionKey): Unit = {
 		val channel = key.channel().asInstanceOf[SocketChannel]
 		swallow(channel.socket().close())
@@ -108,12 +116,18 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 	}
 
 
+	/**
+	  * 接收连接，并纳入处理队列
+	  */
 	def accept(sc: SocketChannel): Unit = {
 		newConnection.add(sc)
 		selector.wakeup()
 	}
 
 
+	/**
+	  * 获取连接，并注册到当前Processor绑定的Selector上
+	  */
 	private def configNewConnections(): Unit = {
 		while (!newConnection.isEmpty) {
 			val sc = newConnection.poll()

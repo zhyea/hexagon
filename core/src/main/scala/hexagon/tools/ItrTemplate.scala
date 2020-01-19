@@ -1,12 +1,18 @@
 package hexagon.tools
 
 
+/**
+  * 自定义迭代器模板类
+  */
 abstract class ItrTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
 
 	private var state: State = NOT_READY
 
 	private var nextItem: Option[T] = None
 
+	/**
+	  * 判断是否有下一个元素
+	  */
 	override def hasNext: Boolean = {
 		if (state == FAILED)
 			throw new IllegalStateException("Iterator is in failed state.")
@@ -18,6 +24,9 @@ abstract class ItrTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
 		}
 	}
 
+	/**
+	  * 迭代获取下一个元素
+	  */
 	override def next(): T = {
 		if (!hasNext())
 			throw new NoSuchElementException()
@@ -29,9 +38,17 @@ abstract class ItrTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
 	}
 
 
+	/**
+	  * 尝试获取下一个元素，用来支持maybeComputeNext()或next()方法。
+	  *
+	  * 当前模板类的核心方法
+	  */
 	protected def makeNext(): T
 
 
+	/**
+	  * 判断是否存在下一个元素，并尝试取出
+	  */
 	def maybeComputeNext(): Boolean = {
 		state = FAILED
 		nextItem = Some(makeNext())

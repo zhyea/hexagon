@@ -3,7 +3,7 @@ package hexagon.api
 import java.nio.ByteBuffer
 
 import hexagon.network.Request
-import hexagon.protocol.ByteBufferEntitySet
+import hexagon.protocol.ByteBufferMessageSet
 import hexagon.utils.IOUtils
 
 
@@ -15,13 +15,13 @@ object PutRequest {
 		val entitySetBuffer = buffer.slice()
 		entitySetBuffer.limit(entitySetSize)
 		buffer.position(buffer.position() + entitySetSize)
-		new PutRequest(topic, new ByteBufferEntitySet(entitySetBuffer))
+		new PutRequest(topic, new ByteBufferMessageSet(entitySetBuffer))
 	}
 }
 
 
 class PutRequest(val topic: String,
-                 val entitySet: ByteBufferEntitySet) extends Request(RequestKeys.Put) {
+                 val entitySet: ByteBufferMessageSet) extends Request(RequestKeys.Put) {
 
 	/**
 	  * topicLength + topic + entitySetSize + entity
