@@ -1,4 +1,4 @@
-package hexagon.server
+package hexagon.network
 
 import java.nio.channels.Selector
 import java.util.concurrent.CountDownLatch

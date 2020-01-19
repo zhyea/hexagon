@@ -1,2 +1,2 @@
-include "core", "api", "server"
+include "core", "client", "server"
 
