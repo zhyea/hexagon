@@ -18,9 +18,9 @@ subprojects {
     }
 
     dependencies {
-        testImplementation group: 'junit', name: 'junit', version: '4.12'
+        implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
         implementation group: 'org.scala-lang', name: 'scala-compiler', version: scalaVersion
-        implementation group: 'com.typesafe.scala-logging', name: 'scala-logging_2.13', version: '3.9.2'
+        testImplementation group: 'junit', name: 'junit', version: '4.12'
     }
 
     task "mkdirs" {

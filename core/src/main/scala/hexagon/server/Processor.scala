@@ -1,10 +1,11 @@
-package hexagon.network
+package hexagon.server
 
 import java.io.EOFException
 import java.nio.channels.{SelectionKey, SocketChannel}
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
+import hexagon.network.{BoundedByteBufferReceive, Receive, Send}
 
 private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractServerThread {
 
@@ -51,7 +52,7 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 
 	def read(key: SelectionKey): Unit = {
 
-		var request: Receive = _
+		var request: Receive = null
 		if (null == key.attachment) {
 			request = new BoundedByteBufferReceive(maxRequestSize)
 			key.attach(request)

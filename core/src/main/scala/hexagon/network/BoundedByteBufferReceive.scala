@@ -7,39 +7,39 @@ import hexagon.exceptions.InvalidRequestException
 
 private[hexagon] class BoundedByteBufferReceive(maxSize: Int) extends Receive {
 
-  private val sizeBuffer: ByteBuffer = ByteBuffer.allocate(Integer.BYTES)
-  private var contentBuffer: ByteBuffer = _
+	private val sizeBuffer: ByteBuffer = ByteBuffer.allocate(Integer.BYTES)
+	private var contentBuffer: ByteBuffer = _
 
-  def this() = this(Int.MaxValue)
-  
-  override def buffer: ByteBuffer = {
-    expectComplete()
-    contentBuffer
-  }
+	def this() = this(Int.MaxValue)
 
-  override def readFrom(channel: ReadableByteChannel): Int = {
-    expectIncomplete()
+	override def buffer: ByteBuffer = {
+		expectComplete()
+		contentBuffer
+	}
 
-    var read = 0
-    if (sizeBuffer.remaining > 0)
-      read += channel.read(sizeBuffer)
+	override def readFrom(channel: ReadableByteChannel): Int = {
+		expectIncomplete()
 
-    if (null == contentBuffer && !sizeBuffer.hasRemaining) {
-      sizeBuffer.rewind()
-      val size = sizeBuffer.getInt()
-      if (size < 0) throw new InvalidRequestException(s"$size is not a valid size.")
-      if (size > maxSize) throw new InvalidRequestException(s"$size is larger than max size of $maxSize")
-      contentBuffer = ByteBuffer.allocate(size)
-    }
+		var read = 0
+		if (sizeBuffer.remaining > 0)
+			read += channel.read(sizeBuffer)
 
-    if (null != contentBuffer) {
-      channel.read(contentBuffer)
-      if (!contentBuffer.hasRemaining) {
-        contentBuffer.rewind()
-        complete.set(true)
-      }
-    }
-    read
-  }
+		if (null == contentBuffer && !sizeBuffer.hasRemaining) {
+			sizeBuffer.rewind()
+			val size = sizeBuffer.getInt()
+			if (size < 0) throw new InvalidRequestException(s"$size is not a valid size.")
+			if (size > maxSize) throw new InvalidRequestException(s"$size is larger than max size of $maxSize")
+			contentBuffer = ByteBuffer.allocate(size)
+		}
+
+		if (null != contentBuffer) {
+			channel.read(contentBuffer)
+			if (!contentBuffer.hasRemaining) {
+				contentBuffer.rewind()
+				complete.set(true)
+			}
+		}
+		read
+	}
 
 }

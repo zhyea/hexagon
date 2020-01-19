@@ -4,7 +4,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.config.HexagonConfig
-import hexagon.network.SocketServer
 import hexagon.tools.Logging
 
 class HexagonServer(val config: HexagonConfig) extends Logging {

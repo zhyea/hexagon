@@ -1,4 +1,4 @@
-package hexagon.network
+package hexagon.server
 
 object RequestHandlers {
 

@@ -9,16 +9,16 @@ import hexagon.tools.Logging
 
 private[hexagon] trait Transmission extends Logging {
 
-  val complete: AtomicBoolean = new AtomicBoolean(false)
+	val complete: AtomicBoolean = new AtomicBoolean(false)
 
-  final def isCompleted: Boolean = complete.get()
+	final def isCompleted: Boolean = complete.get()
 
-  final def expectComplete(): Unit =
-    if (!isCompleted) throw new HexagonException("This operation cannot be completed on an incomplete request.")
+	final def expectComplete(): Unit =
+		if (!isCompleted) throw new HexagonException("This operation cannot be completed on an incomplete request.")
 
 
-  final def expectIncomplete(): Unit =
-    if (isCompleted) throw new HexagonException("This operation cannot be completed on a complete request.")
+	final def expectIncomplete(): Unit =
+		if (isCompleted) throw new HexagonException("This operation cannot be completed on a complete request.")
 
 
 }
@@ -26,31 +26,31 @@ private[hexagon] trait Transmission extends Logging {
 
 trait Receive extends Transmission {
 
-  def buffer: ByteBuffer
+	def buffer: ByteBuffer
 
-  def readFrom(channel: ReadableByteChannel): Int
+	def readFrom(channel: ReadableByteChannel): Int
 
-  def readComplete(channel: ReadableByteChannel): Int = {
-    var totalRead = 0
-    while (!isCompleted) {
-      totalRead += readFrom(channel)
-    }
-    totalRead
-  }
+	def readComplete(channel: ReadableByteChannel): Int = {
+		var totalRead = 0
+		while (!isCompleted) {
+			totalRead += readFrom(channel)
+		}
+		totalRead
+	}
 
 }
 
 
 trait Send extends Transmission {
 
-  def writeTo(channel: GatheringByteChannel): Int
-
-  def writeComplete(channel: GatheringByteChannel): Int = {
-    var totalWrite = 0
-    while (!isCompleted) {
-      totalWrite += writeTo(channel)
-    }
-    totalWrite
-  }
+	def writeTo(channel: GatheringByteChannel): Int
+    
+	def writeComplete(channel: GatheringByteChannel): Int = {
+		var totalWrite = 0
+		while (!isCompleted) {
+			totalWrite += writeTo(channel)
+		}
+		totalWrite
+	}
 
 }

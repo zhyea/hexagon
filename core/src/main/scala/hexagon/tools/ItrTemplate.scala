@@ -3,57 +3,57 @@ package hexagon.tools
 
 abstract class ItrTemplate[T] extends Iterator[T] with java.util.Iterator[T] {
 
-  private var state: State = NOT_READY
+	private var state: State = NOT_READY
 
-  private var nextItem: Option[T] = None
+	private var nextItem: Option[T] = None
 
-  override def hasNext: Boolean = {
-    if (state == FAILED)
-      throw new IllegalStateException("Iterator is in failed state.")
+	override def hasNext: Boolean = {
+		if (state == FAILED)
+			throw new IllegalStateException("Iterator is in failed state.")
 
-    state match {
-      case DONE => false
-      case READY => true
-      case _ => maybeComputeNext()
-    }
-  }
+		state match {
+			case DONE => false
+			case READY => true
+			case _ => maybeComputeNext()
+		}
+	}
 
-  override def next(): T = {
-    if (!hasNext())
-      throw new NoSuchElementException()
-    state = NOT_READY
-    nextItem match {
-      case Some(item) => item
-      case None => throw new IllegalStateException("Expected item but none found.")
-    }
-  }
-
-
-  protected def makeNext(): T
+	override def next(): T = {
+		if (!hasNext())
+			throw new NoSuchElementException()
+		state = NOT_READY
+		nextItem match {
+			case Some(item) => item
+			case None => throw new IllegalStateException("Expected item but none found.")
+		}
+	}
 
 
-  def maybeComputeNext(): Boolean = {
-    state = FAILED
-    nextItem = Some(makeNext())
-    if (state == DONE) {
-      false
-    } else {
-      state = READY
-      true
-    }
-  }
+	protected def makeNext(): T
 
-  protected def done(): T = {
-    state = DONE
-    null.asInstanceOf[T]
-  }
 
-  protected def resetState(): Unit = {
-    state = NOT_READY
-  }
+	def maybeComputeNext(): Boolean = {
+		state = FAILED
+		nextItem = Some(makeNext())
+		if (state == DONE) {
+			false
+		} else {
+			state = READY
+			true
+		}
+	}
 
-  override def remove(): Unit =
-    throw new UnsupportedOperationException("Removal not supported")
+	protected def done(): T = {
+		state = DONE
+		null.asInstanceOf[T]
+	}
+
+	protected def resetState(): Unit = {
+		state = NOT_READY
+	}
+
+	override def remove(): Unit =
+		throw new UnsupportedOperationException("Removal not supported")
 
 }
 

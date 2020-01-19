@@ -1,4 +1,4 @@
-package hexagon.network
+package hexagon.server
 
 import hexagon.tools.Logging
 import hexagon.utils.Threads
@@ -14,6 +14,7 @@ private[hexagon] class SocketServer(private val host: String,
 	private var acceptor: Acceptor = _
 
 	def startup(): Unit = {
+
 		info("Starting socket server")
 
 		for (i <- 0 until numProcessorThreads) {
@@ -30,6 +31,7 @@ private[hexagon] class SocketServer(private val host: String,
 
 
 	def shutdown(): Unit = {
+
 		info("Shutting down.")
 
 		if (null != acceptor) acceptor.shutdown()

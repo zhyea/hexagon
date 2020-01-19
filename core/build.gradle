@@ -1,4 +1,4 @@
-project(':core') {
+project(":core") {
 
     dependencies {
         implementation group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'

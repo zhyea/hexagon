@@ -1,2 +1,2 @@
-include 'core', 'api'
+include 'core', 'api', 'server'
 

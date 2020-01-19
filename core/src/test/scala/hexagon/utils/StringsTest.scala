@@ -5,15 +5,15 @@ import org.junit.{Assert, Test}
 @Test class StringsTest {
 
 
-  @Test def isBlankTest(): Unit = {
+	@Test def isBlankTest(): Unit = {
 
-    import Strings.isBlank
+		import Strings.isBlank
 
-    Assert.assertTrue(isBlank(""))
-    Assert.assertTrue(isBlank("  "))
-    Assert.assertTrue(isBlank("  "))
-    Assert.assertFalse(isBlank(" 111 "))
-  }
+		Assert.assertTrue(isBlank(""))
+		Assert.assertTrue(isBlank("  "))
+		Assert.assertTrue(isBlank("  "))
+		Assert.assertFalse(isBlank(" 111 "))
+	}
 
 
 }

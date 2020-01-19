@@ -1,9 +1,9 @@
 package hexagon
 
-import hexagon.server.{HexagonServer, HexagonServerBootable}
-import hexagon.utils.PropKit
 import hexagon.config.HexagonConfig
+import hexagon.server.{HexagonServer, HexagonServerBootable}
 import hexagon.tools.Logging
+import hexagon.utils.PropKit
 
 object Hexagon extends Logging {
 
