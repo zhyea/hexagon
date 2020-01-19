@@ -1,11 +1,10 @@
-package hexagon.server
+package hexagon.network
 
 import java.io.EOFException
 import java.nio.channels.{SelectionKey, SocketChannel}
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import hexagon.exceptions.InvalidRequestException
-import hexagon.network.{BoundedByteBufferReceive, Receive, Send}
 
 private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractServerThread {
 

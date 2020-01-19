@@ -7,7 +7,8 @@ import java.util.{ArrayList, Collections, Comparator}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong}
 
 import hexagon.protocol.FileEntitySet
-import hexagon.tools.{Logging, SysTime}
+import hexagon.tools.Logging
+import hexagon.utils.SysTime
 
 
 private[log] object Log {

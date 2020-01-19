@@ -1,4 +1,4 @@
-package hexagon.server
+package hexagon.network
 
 import java.net.InetSocketAddress
 import java.nio.channels.{SelectionKey, ServerSocketChannel}

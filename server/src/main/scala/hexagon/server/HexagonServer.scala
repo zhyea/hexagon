@@ -4,6 +4,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 import hexagon.config.HexagonConfig
+import hexagon.network
 import hexagon.tools.Logging
 
 class HexagonServer(val config: HexagonConfig) extends Logging {
@@ -11,13 +12,13 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
 	private val isRunning: AtomicBoolean = new AtomicBoolean(false)
 	private val shutdownLatch: CountDownLatch = new CountDownLatch(1)
 
-	private var socketServer: SocketServer = _
+	private var socketServer: network.SocketServer = _
 
 	def startup(): Unit = {
 		info("Hexagon server is starting.")
 		isRunning.set(true)
 
-		socketServer = new SocketServer(config.host,
+		socketServer = new network.SocketServer(config.host,
 			config.port,
 			config.numNetworkThreads,
 			config.socketSendBuffer,

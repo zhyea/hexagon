@@ -1,6 +1,7 @@
 package hexagon.tools
 
 import java.util.concurrent.ConcurrentHashMap
+
 import scala.jdk.CollectionConverters._
 
 class Pool[K, V] extends Iterable[(K, V)] {

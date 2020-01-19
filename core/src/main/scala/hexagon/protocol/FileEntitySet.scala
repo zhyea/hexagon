@@ -5,8 +5,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.{FileChannel, GatheringByteChannel}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 
-import hexagon.tools.SysTime
-import hexagon.utils.IOUtils
+import hexagon.utils.{IOUtils, SysTime}
 
 class FileEntitySet(private[protocol] val channel: FileChannel,
                     private[protocol] val offset: Long,
