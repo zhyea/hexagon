@@ -1,6 +1,6 @@
 package hexagon.handler
 
-import hexagon.api.PutRequest
+import hexagon.api.BloomRequest
 import hexagon.network.{Receive, Send}
 import hexagon.utils.SysTime
 
@@ -11,7 +11,7 @@ class PutRequestHandler extends Handler {
 
 	override def handle(receive: Receive): Option[Send] = {
 		val start = SysTime.milli
-		val request = PutRequest.readFrom(receive.buffer)
+		val request = BloomRequest.readFrom(receive.buffer)
 
 		if (logger.isTraceEnabled())
 			logger.trace(s"Put request $request")
@@ -21,7 +21,7 @@ class PutRequestHandler extends Handler {
 	}
 
 
-	private def handle(request: PutRequest): Long = {
+	private def handle(request: BloomRequest): Long = {
 		???
 	}
 

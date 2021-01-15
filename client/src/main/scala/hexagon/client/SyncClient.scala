@@ -5,13 +5,15 @@ import java.net.InetSocketAddress
 import java.nio.channels.SocketChannel
 import java.util.concurrent.atomic.AtomicBoolean
 
+import hexagon.api.{BloomRequest, BloomResponse}
 import hexagon.config.ClientConfig
-import hexagon.network.BoundedByteBufferSend
+import hexagon.network.{BoundedByteBufferReceive, BoundedByteBufferSend, Receive}
+import hexagon.protocol.{ByteBufferMessageSet, Message}
 import hexagon.tools.Logging
 import hexagon.utils.SysTime
 
 
-private[hexagon] class ClientThread(config: ClientConfig) extends Logging {
+private[hexagon] class SyncClient(config: ClientConfig) extends Logging {
 
 
 	private var channel: SocketChannel = _
@@ -21,12 +23,19 @@ private[hexagon] class ClientThread(config: ClientConfig) extends Logging {
 	private val isRunning = new AtomicBoolean(true)
 
 
-	private def send(send: BoundedByteBufferSend): Unit = {
+	def send(topic: String, messages: ByteBufferMessageSet): BloomResponse =
+		send(new BoundedByteBufferSend(new BloomRequest(topic, messages)))
+
+	def send(topic: String, messages: Message*): BloomResponse = send(topic, new ByteBufferMessageSet(messages: _*))
+
+
+	private def send(bufferSend: BoundedByteBufferSend): BloomResponse = {
 		lock synchronized {
 			makeConnection()
 
 			try {
-				send.writeComplete(channel)
+				bufferSend.writeCompletely(channel)
+				BloomResponse.readFrom(receive().buffer)
 			} catch {
 				case e: IOException =>
 					disconnect()
@@ -34,6 +43,13 @@ private[hexagon] class ClientThread(config: ClientConfig) extends Logging {
 				case e2 => throw e2
 			}
 		}
+	}
+
+
+	private def receive(): Receive = {
+		val response = new BoundedByteBufferReceive()
+		response.readCompletely(channel)
+		response
 	}
 
 
@@ -75,6 +91,14 @@ private[hexagon] class ClientThread(config: ClientConfig) extends Logging {
 			}
 		} catch {
 			case e: Exception => error(s"Error on disconnect from ${config.host}:${config.port} :", e)
+		}
+	}
+
+
+	def close(): Unit = {
+		lock synchronized {
+			disconnect()
+			isRunning.compareAndSet(true, false)
 		}
 	}
 

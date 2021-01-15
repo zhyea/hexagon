@@ -1,4 +1,4 @@
-package hexagon.model
+package hexagon.cluster
 
 import hexagon.utils.NumberUtils._
 

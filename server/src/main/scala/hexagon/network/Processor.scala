@@ -4,6 +4,7 @@ import java.io.EOFException
 import java.nio.channels.{SelectionKey, SocketChannel}
 import java.util.concurrent.ConcurrentLinkedQueue
 
+import hexagon.api.BloomRequest
 import hexagon.exceptions.InvalidRequestException
 
 private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractServerThread {
@@ -81,7 +82,10 @@ private class Processor(val id: Int, val maxRequestSize: Int) extends AbstractSe
 	}
 
 
-	private def handle(key: SelectionKey, request: Receive): Option[Send] = {
+	private def handle(key: SelectionKey, receive: Receive): Option[Send] = {
+		val request = BloomRequest.readFrom(receive.buffer)
+		println(request)
+
 
 		???
 	}

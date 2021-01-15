@@ -1,15 +1,17 @@
 package hexagon.serializer
 
+import hexagon.protocol.Message
+
 
 trait Serializer[T] {
 
-	def serialize(src: T): Array[Byte]
+	def toMessage(src: T): Message
 
 }
 
 
 class StringSerializer extends Serializer[String] {
 
-	override def serialize(src: String): Array[Byte] = src.getBytes
+	override def toMessage(src: String): Message = new Message(src.getBytes)
 
 }

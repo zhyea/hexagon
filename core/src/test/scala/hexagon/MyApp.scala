@@ -1,25 +1,14 @@
 package hexagon
 
-import java.util.concurrent.TimeUnit
 
-import hexagon.tools.Logging
+object MyApp extends App {
+
+	val list = List((1, 'a'), (2, 'b'), (3, 'c'), (1, 'e'), (1, 'f'))
+
+	val map = list.groupMapReduce(_._1)(_._2.toString)(_ ++ _)
+
+	println(map)
 
 
-object MyApp extends App with Logging {
-
-	def mTime: Long = System.currentTimeMillis()
-
-	val fTime = () => System.currentTimeMillis()
-
-	def job(t1: => Long, t2: () => Long) = {
-		for (i <- 0 to 3) {
-			println(s"start time: $t1")
-			println(s"  end time: ${t2()}")
-			TimeUnit.SECONDS.sleep(1L)
-			println("------------------------------------------------------------")
-		}
-	}
-
-	job(mTime, fTime)
 
 }

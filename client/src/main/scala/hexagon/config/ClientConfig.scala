@@ -5,7 +5,7 @@ import java.util.Properties
 import hexagon.utils.PropKit._
 
 
-class ClientConfig(props: Properties) {
+class ClientConfig(val props: Properties) {
 
 
 	val host: String = getString(props, "host")
