@@ -2,6 +2,7 @@ project(":server") {
 
     dependencies {
         implementation project(":core")
+        implementation group: 'com.google.guava', name: 'guava', version: '23.0'
     }
 
 }
