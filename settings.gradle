@@ -1,2 +1,3 @@
+rootProject.name = 'hexagon'
 include "core", "client", "server"
 
