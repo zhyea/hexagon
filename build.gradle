@@ -1,15 +1,5 @@
-
-
-buildscript {
-    repositories {
-        mavenLocal()
-        flatDir {
-            dirs '/D:/JDevelop/maven/mavenrepo', '/D:/JDevelop/mvnrepo'
-        }
-        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-        google()
-        jcenter()
-    }
+plugins {
+    id 'application'
 }
 
 
@@ -46,12 +36,6 @@ subprojects {
     }
 
 }
-
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 
 
 

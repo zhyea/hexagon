@@ -1,9 +1,10 @@
 project(':api') {
 
     dependencies {
-        compile project(":common")
+        implementation project(":common")
         implementation group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
-        implementation group: 'io.netty', name: 'netty', version: '4.1.58.Final'
+        implementation group: 'io.netty', name: 'netty-all', version: '4.1.58.Final'
+
     }
 
 }

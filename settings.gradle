@@ -1,2 +1,4 @@
+rootProject.name = 'hexagon'
+
 include 'common', 'server', 'api', 'client'
 
