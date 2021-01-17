@@ -1,12 +1,8 @@
-project(":client") {
-
-    plugins {
-        id 'application'
-    }
+plugins {
+    id 'application'
+}
 
 
-    dependencies {
-        implementation project(":core")
-    }
-
+dependencies {
+    implementation project(":core")
 }

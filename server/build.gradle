@@ -1,8 +1,9 @@
-project(":server") {
+plugins {
+    id 'application'
+}
 
-    dependencies {
-        implementation project(":core")
-        implementation group: 'com.google.guava', name: 'guava', version: '23.0'
-    }
 
+dependencies {
+    implementation project(":core")
+    implementation group: 'com.google.guava', name: 'guava', version: '23.0'
 }
