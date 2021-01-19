@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     implementation group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
+
     implementation group: 'io.vertx', name: 'vertx-core', version: '4.0.0'
 
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
