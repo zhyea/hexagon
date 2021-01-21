@@ -5,27 +5,34 @@ import java.util.concurrent.atomic.AtomicBoolean
 import hexagon.config.HexagonConfig
 import hexagon.network
 import hexagon.tools.Logging
-import io.vertx.core.net.NetServer
+import io.vertx.core.{Vertx, VertxOptions}
+import io.vertx.core.net.{NetServer, NetServerOptions}
 
 class HexagonServer(val config: HexagonConfig) extends Logging {
 
 	private val isRunning: AtomicBoolean = new AtomicBoolean(false)
 	private val shutdownLatch: CountDownLatch = new CountDownLatch(1)
 
-	private var socketServer: NetServer = _
+	private var netServer: NetServer = _
 
 	def startup(): Unit = {
 		info("Hexagon server is starting.")
 		isRunning.set(true)
 
-		socketServer = new network.SocketServer(config.host,
-			config.port,
-			config.numNetworkThreads,
-			config.socketSendBuffer,
-			config.socketReceiveBuffer,
-			config.maxMessageSize)
 
-		socketServer.startup()
+		val vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(config.numNetworkThreads))
+
+		val options =
+			new NetServerOptions()
+				.setPort(config.port)
+				.setReceiveBufferSize(config.socketReceiveBuffer)
+				.setSendBufferSize(config.socketSendBuffer)
+
+
+		netServer = vertx.createNetServer(options)
+
+
+		netServer.startup()
 
 		info("Hexagon server started")
 	}
@@ -37,7 +44,7 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
 		val canShutdown = isRunning.compareAndSet(true, false)
 		if (canShutdown) {
 			info("Shutting down hexagon server.")
-			if (null != socketServer) socketServer.shutdown()
+			if (null != netServer) netServer.shutdown()
 			shutdownLatch.countDown()
 			info("Shutdown hexagon server completely.")
 		}
