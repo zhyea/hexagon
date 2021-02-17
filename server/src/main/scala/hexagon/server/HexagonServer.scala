@@ -1,38 +1,43 @@
 package hexagon.server
 
+import hexagon.config.HexagonConfig
+import hexagon.network.ServerVerticle
+import hexagon.tools.Logging
+import io.vertx.core.{AsyncResult, DeploymentOptions, Handler, Vertx}
+
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
-import hexagon.config.HexagonConfig
-import hexagon.network
-import hexagon.tools.Logging
-import io.vertx.core.{Vertx, VertxOptions}
-import io.vertx.core.net.{NetServer, NetServerOptions}
 
 class HexagonServer(val config: HexagonConfig) extends Logging {
 
 	private val isRunning: AtomicBoolean = new AtomicBoolean(false)
 	private val shutdownLatch: CountDownLatch = new CountDownLatch(1)
+	private var vertx: Vertx = _
 
-	private var netServer: NetServer = _
 
 	def startup(): Unit = {
 		info("Hexagon server is starting.")
+
 		isRunning.set(true)
 
+		val options: DeploymentOptions =
+			new DeploymentOptions()
+				.setWorkerPoolName("plumber-pool")
+				.setWorkerPoolSize(1)
 
-		val vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(config.numNetworkThreads))
+		vertx = Vertx.vertx()
 
-		val options =
-			new NetServerOptions()
-				.setPort(config.port)
-				.setReceiveBufferSize(config.socketReceiveBuffer)
-				.setSendBufferSize(config.socketSendBuffer)
+		vertx.getOrCreateContext().put("cfg", config)
 
-
-		netServer = vertx.createNetServer(options)
-
-
-		netServer.startup()
+		vertx.deployVerticle(classOf[ServerVerticle].getName, options, new Handler[AsyncResult[String]] {
+			override def handle(result: AsyncResult[String]): Unit = {
+				if (result.succeeded) {
+					System.out.println("Server is now listening!")
+				} else {
+					System.out.println("Failed to bind!")
+				}
+			}
+		})
 
 		info("Hexagon server started")
 	}
@@ -44,7 +49,9 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
 		val canShutdown = isRunning.compareAndSet(true, false)
 		if (canShutdown) {
 			info("Shutting down hexagon server.")
-			if (null != netServer) netServer.shutdown()
+			if (null != vertx) {
+				vertx.close()
+			}
 			shutdownLatch.countDown()
 			info("Shutdown hexagon server completely.")
 		}
