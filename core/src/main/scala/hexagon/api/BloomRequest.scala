@@ -1,17 +1,17 @@
 package hexagon.api
 
 import java.nio.ByteBuffer
-
 import hexagon.network.RequestOrResponse
 import hexagon.protocol.ByteBufferMessageSet
 import hexagon.utils.IOUtils
+import io.vertx.core.buffer.Buffer
 
 
 object BloomRequest {
 
-	def readFrom(buffer: ByteBuffer): BloomRequest = {
+	def readFrom(buffer:Buffer): BloomRequest = {
 		val topic = IOUtils.readShortString(buffer)
-		val entitySetSize = buffer.getInt
+		val entitySetSize = buffer.getInt(0)
 		val messageSetBuffer = buffer.slice()
 		messageSetBuffer.limit(entitySetSize)
 		buffer.position(buffer.position() + entitySetSize)

@@ -10,12 +10,13 @@ import io.vertx.core.net.NetSocket
 class SocketHandler extends Handler[NetSocket] {
 
 
-	private val msgHandler = new BufferHandler()
-
-
 	override def handle(socket: NetSocket): Unit = {
-		socket.handler(msgHandler)
+
+		socket.handler(buff => {
+			val bytes = buff.getBytes
+			bytes.foreach(println)
+		})
+
 	}
-
-
+	
 }
