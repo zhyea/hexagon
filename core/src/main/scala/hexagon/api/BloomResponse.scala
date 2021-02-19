@@ -1,9 +1,10 @@
 package hexagon.api
 
-import java.nio.ByteBuffer
+import com.sun.xml.internal.ws.handler.HandlerProcessor.RequestOrResponse
 
+import java.nio.ByteBuffer
 import hexagon.network.RequestOrResponse
-import hexagon.utils.IOUtils
+import hexagon.utils.IOKit
 
 import scala.collection.mutable.ListBuffer
 
@@ -11,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 object BloomResponse {
 
 	def readFrom(buffer: ByteBuffer): BloomResponse = {
-		val topic = IOUtils.readShortString(buffer)
+		val topic = IOKit.readShortString(buffer)
 		val len = buffer.getInt
 		val msgStates = ListBuffer[Short]()
 
@@ -22,7 +23,7 @@ object BloomResponse {
 }
 
 
-case class BloomResponse(topic: String, msgStates: List[Short]) extends RequestOrResponse(RequestKeys.Bloom) {
+case class BloomResponse(topic: String, msgStates: List[Short])  {
 
 
 	override def sizeInBytes: Int = {
@@ -34,7 +35,7 @@ case class BloomResponse(topic: String, msgStates: List[Short]) extends RequestO
 
 
 	override def writeTo(buffer: ByteBuffer): Unit = {
-		IOUtils.writeShortString(buffer, topic)
+		IOKit.writeShortString(buffer, topic)
 		buffer.putInt(msgStates.size)
 		msgStates.foreach(buffer.putShort)
 	}

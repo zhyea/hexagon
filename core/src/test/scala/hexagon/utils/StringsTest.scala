@@ -7,7 +7,7 @@ import org.junit.{Assert, Test}
 
 	@Test def isBlankTest(): Unit = {
 
-		import Strings.isBlank
+		import StringKit.isBlank
 
 		Assert.assertTrue(isBlank(""))
 		Assert.assertTrue(isBlank("  "))

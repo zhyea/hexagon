@@ -13,8 +13,6 @@ class ClientConfig(val props: Properties) {
 	val port: Int = getInt(props, "port")
 
 
-	//-----
-
 	val maxMessageSize: Int = getInt(props, "max.message.size", 1000000)
 
 	val bufferSize: Int = getInt(props, "buffer.size", 100 * 1024)

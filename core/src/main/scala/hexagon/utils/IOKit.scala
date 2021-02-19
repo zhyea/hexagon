@@ -6,12 +6,12 @@ import java.io.{File, FileInputStream, RandomAccessFile}
 import java.nio.channels.FileChannel
 import java.nio.charset.{Charset, StandardCharsets}
 
-object IOUtils {
+object IOKit {
 
 
 	/**
-	  * Read size prefixed string where the size is stored as a 2 byte short.
-	  */
+	 * Read size prefixed string where the size is stored as a 2 byte short.
+	 */
 	def readShortString(buffer: Buffer, encoding: Charset = StandardCharsets.UTF_8): String = {
 		val size: Int = buffer.getUnsignedShort(0)
 		if (size < 0)
@@ -21,9 +21,10 @@ object IOUtils {
 		new String(bytes, encoding)
 	}
 
+	
 	/**
-	  * Write a size prefixed string where the size is stored as a 2 byte short
-	  */
+	 * Write a size prefixed string where the size is stored as a 2 byte short
+	 */
 	def writeShortString(buffer: Buffer, str: String, encoding: Charset = StandardCharsets.UTF_8): Unit = {
 		if (str == null) {
 			buffer.appendShort(-1)
@@ -43,6 +44,4 @@ object IOUtils {
 			new FileInputStream(file).getChannel
 		}
 	}
-
-
 }

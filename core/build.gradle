@@ -2,15 +2,18 @@ plugins {
     id 'java-library'
 }
 
+ext {
+    vertxVersion = '4.0.2'
+}
+
 dependencies {
-    implementation group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
+    api group: 'org.apache.curator', name: 'curator-recipes', version: '2.13.0'
 
-    implementation group: 'io.vertx', name: 'vertx-core', version: '4.0.0'
-    implementation group: 'io.vertx', name: 'vertx-codegen', version: '4.0.2'
-
-
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
-    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-scala_2.12', version: '2.10.1'
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    api group: 'io.vertx', name: 'vertx-core', version: vertxVersion
+    api group: 'io.vertx', name: 'vertx-codegen', version: vertxVersion
+    
+    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.1'
+    api group: 'com.fasterxml.jackson.module', name: 'jackson-module-scala_2.12', version: '2.10.1'
+    api group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 
 }

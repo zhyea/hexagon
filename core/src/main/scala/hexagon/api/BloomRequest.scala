@@ -1,16 +1,16 @@
 package hexagon.api
 
+import com.sun.xml.internal.ws.handler.HandlerProcessor.RequestOrResponse
+
 import java.nio.ByteBuffer
-import hexagon.network.RequestOrResponse
-import hexagon.protocol.BufferMessageSet
-import hexagon.utils.IOUtils
+import hexagon.utils.IOKit
 import io.vertx.core.buffer.Buffer
 
 
 object BloomRequest {
 
-	def readFrom(buffer:Buffer): BloomRequest = {
-		val topic = IOUtils.readShortString(buffer)
+	def readFrom(buffer: Buffer): BloomRequest = {
+		val topic = IOKit.readShortString(buffer)
 		val entitySetSize = buffer.getInt(0)
 		val messageSetBuffer = buffer.slice()
 		messageSetBuffer.limit(entitySetSize)
@@ -21,11 +21,11 @@ object BloomRequest {
 
 
 case class BloomRequest(topic: String,
-						messageSet: BufferMessageSet) extends RequestOrResponse(RequestKeys.Bloom) {
+						bytes: Array[Byte]) {
 
 	/**
-	  * topicLength + topic + messageSetSize + entity
-	  */
+	 * topicLength + topic + messageSetSize + entity
+	 */
 	override def sizeInBytes: Int = {
 		java.lang.Short.BYTES + /* topic长度 */
 			topic.length + /* topic */
@@ -34,7 +34,7 @@ case class BloomRequest(topic: String,
 	}
 
 	override def writeTo(buffer: ByteBuffer): Unit = {
-		IOUtils.writeShortString(buffer, topic)
+		IOKit.writeShortString(buffer, topic)
 		buffer.putInt(messageSet.sizeInBytes.toInt)
 		buffer.put(messageSet.serialized)
 		messageSet.serialized.rewind()
