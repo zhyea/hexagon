@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import hexagon.api.{BloomRequest, BloomResponse}
 import hexagon.config.ClientConfig
 import hexagon.network.{BoundedByteBufferReceive, BoundedByteBufferSend, Receive}
-import hexagon.protocol.{ByteBufferMessageSet, Message}
+import hexagon.protocol.{BufferMessageSet, Message}
 import hexagon.tools.Logging
 import hexagon.utils.SysTime
 
@@ -23,10 +23,10 @@ private[hexagon] class SyncClient(config: ClientConfig) extends Logging {
 	private val isRunning = new AtomicBoolean(true)
 
 
-	def send(topic: String, messages: ByteBufferMessageSet): BloomResponse =
+	def send(topic: String, messages: BufferMessageSet): BloomResponse =
 		send(new BoundedByteBufferSend(new BloomRequest(topic, messages)))
 
-	def send(topic: String, messages: Message*): BloomResponse = send(topic, new ByteBufferMessageSet(messages: _*))
+	def send(topic: String, messages: Message*): BloomResponse = send(topic, new BufferMessageSet(messages: _*))
 
 
 	private def send(bufferSend: BoundedByteBufferSend): BloomResponse = {

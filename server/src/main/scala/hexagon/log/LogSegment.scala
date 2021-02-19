@@ -2,7 +2,7 @@ package hexagon.log
 
 import java.io.File
 
-import hexagon.protocol.{ByteBufferMessageSet, FileMessageSet}
+import hexagon.protocol.{BufferMessageSet, FileMessageSet}
 
 
 private[log] class LogSegment(val file: File, val time: Long, val entitySet: FileMessageSet, val start: Long) {
@@ -16,7 +16,7 @@ private[log] class LogSegment(val file: File, val time: Long, val entitySet: Fil
 			firstAppendTime = Some(time)
 	}
 
-	def append(entities: ByteBufferMessageSet): Unit = {
+	def append(entities: BufferMessageSet): Unit = {
 		if (entities.sizeInBytes > 0) {
 			entitySet.append(entities)
 			updateFirstAppendTime()

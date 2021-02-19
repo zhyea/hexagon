@@ -6,8 +6,8 @@ import java.nio.channels.GatheringByteChannel
 import hexagon.exceptions.{InvalidMessageException, InvalidMessageSizeException}
 import hexagon.tools.ItrTemplate
 
-class ByteBufferMessageSet(private val buffer: ByteBuffer,
-						   private val initOffset: Long = 0L) extends MessageSet {
+class BufferMessageSet(private val buffer: ByteBuffer,
+					   private val initOffset: Long = 0L) extends MessageSet {
 
 
 	def this(messages: Message*) = this(MessageSet.createByteBuffer(messages: _*))
@@ -45,13 +45,13 @@ class ByteBufferMessageSet(private val buffer: ByteBuffer,
 
 	override def equals(other: Any): Boolean = {
 		other match {
-			case that: ByteBufferMessageSet =>
+			case that: BufferMessageSet =>
 				(that canEqual this) && buffer.equals(that.buffer) && initOffset == that.initOffset
 			case _ => false
 		}
 	}
 
-	override def canEqual(other: Any): Boolean = other.isInstanceOf[ByteBufferMessageSet]
+	override def canEqual(other: Any): Boolean = other.isInstanceOf[BufferMessageSet]
 
 	override def hashCode: Int = 31 + buffer.hashCode + initOffset.hashCode
 

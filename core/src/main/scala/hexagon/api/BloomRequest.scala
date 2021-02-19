@@ -2,7 +2,7 @@ package hexagon.api
 
 import java.nio.ByteBuffer
 import hexagon.network.RequestOrResponse
-import hexagon.protocol.ByteBufferMessageSet
+import hexagon.protocol.BufferMessageSet
 import hexagon.utils.IOUtils
 import io.vertx.core.buffer.Buffer
 
@@ -15,13 +15,13 @@ object BloomRequest {
 		val messageSetBuffer = buffer.slice()
 		messageSetBuffer.limit(entitySetSize)
 		buffer.position(buffer.position() + entitySetSize)
-		new BloomRequest(topic, new ByteBufferMessageSet(messageSetBuffer))
+		new BloomRequest(topic, new BufferMessageSet(messageSetBuffer))
 	}
 }
 
 
 case class BloomRequest(topic: String,
-						messageSet: ByteBufferMessageSet) extends RequestOrResponse(RequestKeys.Bloom) {
+						messageSet: BufferMessageSet) extends RequestOrResponse(RequestKeys.Bloom) {
 
 	/**
 	  * topicLength + topic + messageSetSize + entity
