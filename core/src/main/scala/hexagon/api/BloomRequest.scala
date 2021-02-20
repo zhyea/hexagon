@@ -1,7 +1,6 @@
 package hexagon.api
 
 
-import java.nio.ByteBuffer
 import hexagon.utils.IOKit
 import io.vertx.core.buffer.Buffer
 
@@ -17,12 +16,12 @@ object BloomRequest {
 
 
 case class BloomRequest(topic: String,
-						message: String) {
+						message: String) extends Transmission {
 
 	/**
-	 * topicLength + topic + messageSetSize + entity
+	 * topicLength + topic + messageSize + message
 	 */
-	override def sizeInBytes: Int = {
+	override def sizeInBytes(): Int = {
 		java.lang.Short.BYTES + /* topic长度 */
 			topic.length + /* topic */
 			Integer.BYTES + /* message数量 */

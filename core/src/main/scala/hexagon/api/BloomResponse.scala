@@ -1,53 +1,43 @@
 package hexagon.api
 
-import com.sun.xml.internal.ws.handler.HandlerProcessor.RequestOrResponse
 
-import java.nio.ByteBuffer
-import hexagon.network.RequestOrResponse
 import hexagon.utils.IOKit
-
-import scala.collection.mutable.ListBuffer
+import io.vertx.core.buffer.Buffer
 
 
 object BloomResponse {
 
-	def readFrom(buffer: ByteBuffer): BloomResponse = {
+	def readFrom(buffer: Buffer): BloomResponse = {
 		val topic = IOKit.readShortString(buffer)
-		val len = buffer.getInt
-		val msgStates = ListBuffer[Short]()
-
-		for (i <- 0 to len) msgStates += buffer.getShort
-
-		new BloomResponse(topic, msgStates.toList)
+		val result: Byte = buffer.getByte(0)
+		new BloomResponse(topic, result)
 	}
 }
 
 
-case class BloomResponse(topic: String, msgStates: List[Short])  {
+case class BloomResponse(topic: String, result: Byte) extends Transmission {
 
 
-	override def sizeInBytes: Int = {
+	override def sizeInBytes(): Int = {
 		java.lang.Short.BYTES + /* topic 长度 */
 			topic.length + /* topic内容 */
-			Integer.BYTES + /* message数量 */
-			msgStates.size * java.lang.Short.BYTES /* message 状态 */
+			1 /* 结果 */
 	}
 
 
-	override def writeTo(buffer: ByteBuffer): Unit = {
+	override def writeTo(buffer: Buffer): Unit = {
 		IOKit.writeShortString(buffer, topic)
-		buffer.putInt(msgStates.size)
-		msgStates.foreach(buffer.putShort)
+		buffer.appendByte(result)
 	}
 
-	override def toString: String = s"BloomResponse(${topic}, $msgStates)"
+	override def toString: String = s"BloomResponse(${topic}, $result)"
 
-	override def hashCode(): Int = 31 + topic.hashCode + msgStates.hashCode()
+	override def hashCode(): Int = 31 + topic.hashCode + result
 
 	override def equals(other: Any): Boolean = {
 		other match {
 			case that: BloomResponse =>
-				(that canEqual this) && topic == that.topic && msgStates.equals(that.msgStates)
+				(that canEqual this) && topic == that.topic && result == that.result
 			case _ => false
 		}
 	}
