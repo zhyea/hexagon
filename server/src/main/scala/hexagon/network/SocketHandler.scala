@@ -15,6 +15,9 @@ class SocketHandler extends Handler[NetSocket] {
 		socket.handler(buff => {
 			val bytes = buff.getBytes
 			bytes.foreach(println)
+
+
+			buff
 		})
 
 	}
