@@ -33,5 +33,11 @@ class ServerVerticle extends AbstractVerticle {
 		server.listen()
 	}
 
-
+	override def stop(stopPromise: Promise[Void]): Unit = {
+		server.close(result => {
+			if (result.succeeded()) {
+				println("Close successfully!")
+			}
+		})
+	}
 }

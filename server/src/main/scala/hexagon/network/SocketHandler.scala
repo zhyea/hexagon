@@ -1,6 +1,8 @@
 package hexagon.network
 
+import hexagon.api.BloomRequest
 import io.vertx.core.Handler
+import io.vertx.core.buffer.Buffer
 import io.vertx.core.net.NetSocket
 
 /**
@@ -13,13 +15,15 @@ class SocketHandler extends Handler[NetSocket] {
 	override def handle(socket: NetSocket): Unit = {
 
 		socket.handler(buff => {
-			val bytes = buff.getBytes
-			bytes.foreach(println)
+			val request = BloomRequest.readFrom(buff)
 
+			println(request.message)
 
-			buff
+			val out = Buffer.buffer()
+			out.appendByte(1)
+			socket.write(out)
 		})
 
 	}
-	
+
 }
