@@ -1,6 +1,6 @@
 package hexagon
 
-import hexagon.config.HexagonConfig
+import hexagon.config.HexagonServerConfig
 import hexagon.server.{HexagonServer, HexagonServerBootable}
 import hexagon.tools.Logging
 import hexagon.utils.PropKit
@@ -17,7 +17,7 @@ object Hexagon extends Logging {
 
 		try {
 			val props = PropKit.load(args(0))
-			val config = new HexagonConfig(props)
+			val config = new HexagonServerConfig(props)
 
 			val serverBootable = new HexagonServerBootable(config)
 

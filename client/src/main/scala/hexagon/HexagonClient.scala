@@ -1,9 +1,8 @@
 package hexagon
 
-import io.vertx.core.net.NetClient
+import hexagon.config.HexagonClientConfig
 
-class HexagonClient {
+class HexagonClient(config: HexagonClientConfig) {
 
-	val client: NetClient = _
 
 }

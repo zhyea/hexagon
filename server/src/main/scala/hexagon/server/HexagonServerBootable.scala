@@ -1,9 +1,9 @@
 package hexagon.server
 
-import hexagon.config.HexagonConfig
+import hexagon.config.HexagonServerConfig
 import hexagon.tools.Logging
 
-class HexagonServerBootable(config: HexagonConfig) extends Logging {
+class HexagonServerBootable(config: HexagonServerConfig) extends Logging {
 
 	private val server: HexagonServer = new HexagonServer(config)
 

@@ -1,6 +1,6 @@
 package hexagon.server
 
-import hexagon.config.HexagonConfig
+import hexagon.config.HexagonServerConfig
 import hexagon.network.ServerVerticle
 import hexagon.tools.Logging
 import io.vertx.core.{AsyncResult, DeploymentOptions, Handler, Vertx}
@@ -8,7 +8,7 @@ import io.vertx.core.{AsyncResult, DeploymentOptions, Handler, Vertx}
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
-class HexagonServer(val config: HexagonConfig) extends Logging {
+class HexagonServer(val config: HexagonServerConfig) extends Logging {
 
 	private val isRunning: AtomicBoolean = new AtomicBoolean(false)
 	private val shutdownLatch: CountDownLatch = new CountDownLatch(1)
@@ -27,9 +27,7 @@ class HexagonServer(val config: HexagonConfig) extends Logging {
 
 		vertx = Vertx.vertx()
 
-		vertx.getOrCreateContext().put("cfg", config)
-
-		vertx.deployVerticle(classOf[ServerVerticle].getName, options, new Handler[AsyncResult[String]] {
+		vertx.deployVerticle(new ServerVerticle(config), options, new Handler[AsyncResult[String]] {
 			override def handle(result: AsyncResult[String]): Unit = {
 				if (result.succeeded) {
 					System.out.println("Server is now listening!")

@@ -1,6 +1,6 @@
 package hexagon.network
 
-import hexagon.config.HexagonConfig
+import hexagon.config.HexagonServerConfig
 import io.vertx.core.net.{NetServer, NetServerOptions}
 import io.vertx.core.{AbstractVerticle, Promise}
 
@@ -10,7 +10,7 @@ import io.vertx.core.{AbstractVerticle, Promise}
  *
  * @author robin
  */
-class ServerVerticle extends AbstractVerticle {
+class ServerVerticle(config: HexagonServerConfig) extends AbstractVerticle {
 
 
 	private var server: NetServer = _
@@ -18,8 +18,6 @@ class ServerVerticle extends AbstractVerticle {
 	private val socketHandler: SocketHandler = new SocketHandler()
 
 	override def start(promise: Promise[Void]): Unit = {
-
-		val config: HexagonConfig = context.get("cfg")
 
 		val option: NetServerOptions =
 			new NetServerOptions()
