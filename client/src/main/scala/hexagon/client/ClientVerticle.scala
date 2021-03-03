@@ -1,8 +1,8 @@
 package hexagon.client
 
 import hexagon.config.HexagonClientConfig
+import io.vertx.core.net.{NetClient, NetClientOptions}
 import io.vertx.core.{AbstractVerticle, Promise}
-import io.vertx.core.net.NetClient
 
 /**
  *
@@ -14,7 +14,11 @@ class ClientVerticle(config: HexagonClientConfig) extends AbstractVerticle {
 
 
 	override def start(startPromise: Promise[Void]): Unit = {
+		val option: NetClientOptions =
+			new NetClientOptions()
 
+		client = vertx.createNetClient(option)
+		client.connect(config.port, config.host )
 	}
 
 
