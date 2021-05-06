@@ -32,8 +32,6 @@ object Hexagon extends Logging {
 		} catch {
 			case e: Exception => error("Error during hexagon startup ", e)
 		}
-
-		System.exit(1)
 	}
 
 }
